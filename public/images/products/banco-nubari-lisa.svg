@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100">
-  <rect width="900" height="1100" fill="#e9e2d3" />
-  <rect x="40" y="40" width="820" height="1020" fill="none" stroke="#a9713f" stroke-width="1.5" opacity="0.4"/>
-  <circle cx="450" cy="330" r="120" fill="none" stroke="#a9713f" stroke-width="1.5" opacity="0.5"/>
-  <text x="50%" y="52%" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#a9713f" letter-spacing="2">BANCO NUBARI LISA</text>
-  <text x="50%" y="90%" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#a9713f" opacity="0.7" letter-spacing="6">NUBARI · IMAGEN DE MUESTRA</text>
-</svg>
