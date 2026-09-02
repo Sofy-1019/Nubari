@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
     }
 
-    const items = cartLinesToItems(body.lines, getProductById);
+    const items = await cartLinesToItems(body.lines, getProductById);
     if (items.length === 0) {
       return NextResponse.json(
         { error: "No se encontraron los productos del carrito" },

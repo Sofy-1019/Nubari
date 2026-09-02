@@ -130,6 +130,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     }`}
                   >
                     {[v.color, v.material, v.medida].filter(Boolean).join(" · ")}
+                    {v.priceDelta ? (
+                      <span className={v.id === variantId ? "text-nb-rose" : "text-nb-wood"}>
+                        {" "}+{formatARS(v.priceDelta)}
+                      </span>
+                    ) : null}
                   </button>
                 ))}
               </div>

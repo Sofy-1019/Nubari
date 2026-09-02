@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { getProductById } from "@/lib/db/products";
 import ProductForm from "@/components/admin/ProductForm";
 
-export default function EditarProductoPage({ params }: { params: { id: string } }) {
-  const product = getProductById(params.id);
+export default async function EditarProductoPage({ params }: { params: { id: string } }) {
+  const product = await getProductById(params.id);
   if (!product) notFound();
 
   return (

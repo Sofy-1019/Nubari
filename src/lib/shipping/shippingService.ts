@@ -126,15 +126,16 @@ export async function quoteShippingForCart(
   return { destino, opciones, errores };
 }
 
-export function cartLinesToItems(
+export async function cartLinesToItems(
   lines: CartLine[],
-  getProduct: (id: string) => Product | undefined
+  getProduct: (id: string) => Promise<Product | undefined>
 ) {
-  return lines
-    .map((line) => {
-      const product = getProduct(line.productId);
+  const resolved = await Promise.all(
+    lines.map(async (line) => {
+      const product = await getProduct(line.productId);
       if (!product) return null;
       return { product, cantidad: line.cantidad };
     })
-    .filter((x): x is { product: Product; cantidad: number } => x !== null);
+  );
+  return resolved.filter((x): x is { product: Product; cantidad: number } => x !== null);
 }

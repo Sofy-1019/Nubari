@@ -3,9 +3,9 @@ import { getAllProducts } from "@/lib/db/products";
 import { getAllOrders } from "@/lib/db/orders";
 import { formatARS } from "@/lib/utils";
 
-export default function AdminDashboard() {
-  const products = getAllProducts();
-  const orders = getAllOrders();
+export default async function AdminDashboard() {
+  const products = await getAllProducts();
+  const orders = await getAllOrders();
   const pendientes = orders.filter((o) => o.estado === "pendiente_pago").length;
   const ventasTotal = orders.reduce((acc, o) => acc + o.total, 0);
 

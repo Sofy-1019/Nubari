@@ -19,6 +19,15 @@ interface Props {
   initial?: Product;
 }
 
+type FormVariant = {
+  id: string;
+  color: string;
+  material: string;
+  medida: string;
+  stock: string;
+  priceDelta: string;
+};
+
 type FormState = {
   nombre: string;
   descripcion: string;
@@ -34,10 +43,7 @@ type FormState = {
   activo: boolean;
   imagenes: string[];
   diasFabricacion: string;
-  color: string;
-  material: string;
-  medida: string;
-  varianteStock: string;
+  variantes: FormVariant[];
   pesoKg: string;
   altoCm: string;
   anchoCm: string;
@@ -48,7 +54,6 @@ type FormState = {
 };
 
 function fromProduct(p?: Product): FormState {
-  const v = p?.variantes[0];
   return {
     nombre: p?.nombre || "",
     descripcion: p?.descripcion || "",
@@ -64,10 +69,17 @@ function fromProduct(p?: Product): FormState {
     activo: p?.activo ?? true,
     imagenes: p?.imagenes || [],
     diasFabricacion: p?.diasFabricacion ? String(p.diasFabricacion) : "",
-    color: v?.color || "",
-    material: v?.material || "",
-    medida: v?.medida || "",
-    varianteStock: v ? String(v.stock) : p ? String(p.stock) : "1",
+    variantes:
+      p && p.variantes.length > 0
+        ? p.variantes.map((v) => ({
+            id: v.id,
+            color: v.color || "",
+            material: v.material || "",
+            medida: v.medida || "",
+            stock: String(v.stock),
+            priceDelta: v.priceDelta ? String(v.priceDelta) : "",
+          }))
+        : [{ id: `${Date.now()}`, color: "", material: "", medida: "", stock: "1", priceDelta: "" }],
     pesoKg: p ? String(p.logistica.pesoKg) : "",
     altoCm: p ? String(p.logistica.altoCm) : "",
     anchoCm: p ? String(p.logistica.anchoCm) : "",
@@ -117,6 +129,28 @@ export default function ProductForm({ initial }: Props) {
     );
   }
 
+  function updateVariant(id: string, patch: Partial<FormVariant>) {
+    set(
+      "variantes",
+      form.variantes.map((v) => (v.id === id ? { ...v, ...patch } : v))
+    );
+  }
+
+  function addVariant() {
+    set("variantes", [
+      ...form.variantes,
+      { id: `${Date.now()}`, color: "", material: "", medida: "", stock: "1", priceDelta: "" },
+    ]);
+  }
+
+  function removeVariant(id: string) {
+    if (form.variantes.length <= 1) return;
+    set(
+      "variantes",
+      form.variantes.filter((v) => v.id !== id)
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -142,15 +176,14 @@ export default function ProductForm({ initial }: Props) {
       esProductoDePrueba: initial?.esProductoDePrueba ?? false,
       diasFabricacion: form.diasFabricacion ? Number(form.diasFabricacion) : undefined,
       imagenes: form.imagenes.length > 0 ? form.imagenes : ["/images/products/placeholder.svg"],
-      variantes: [
-        {
-          id: initial?.variantes[0]?.id || `${Date.now()}`,
-          color: form.color || undefined,
-          material: form.material || undefined,
-          medida: form.medida || undefined,
-          stock: Number(form.varianteStock || 0),
-        },
-      ],
+      variantes: form.variantes.map((v) => ({
+        id: v.id,
+        color: v.color || undefined,
+        material: v.material || undefined,
+        medida: v.medida || undefined,
+        stock: Number(v.stock || 0),
+        priceDelta: v.priceDelta ? Number(v.priceDelta) : undefined,
+      })),
       logistica: {
         pesoKg: Number(form.pesoKg || 0),
         altoCm: Number(form.altoCm || 0),
@@ -288,25 +321,75 @@ export default function ProductForm({ initial }: Props) {
       </section>
 
       <section>
-        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-4">VARIANTE PRINCIPAL</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Field label="Color">
-            <input className="input" value={form.color} onChange={(e) => set("color", e.target.value)} />
-          </Field>
-          <Field label="Material">
-            <input className="input" value={form.material} onChange={(e) => set("material", e.target.value)} />
-          </Field>
-          <Field label="Medida">
-            <input className="input" value={form.medida} onChange={(e) => set("medida", e.target.value)} />
-          </Field>
-          <Field label="Stock de esta variante">
-            <input className="input" type="number" value={form.varianteStock} onChange={(e) => set("varianteStock", e.target.value)} />
-          </Field>
-        </div>
-        <p className="text-xs text-nb-taupe mt-2">
-          Para múltiples variantes (color/material/medida), editá el producto vía API o
-          ampliá este formulario — la estructura de datos ya soporta N variantes por producto.
+        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-2">VARIANTES (COLOR / MATERIAL)</h2>
+        <p className="text-xs text-nb-taupe mb-4">
+          Agregá una fila por cada opción que el cliente pueda elegir. Si una opción cuesta
+          más (por ejemplo, un color con pintura especial), cargá esa diferencia en
+          "Precio extra" — se suma automáticamente al precio base cuando el cliente la elige.
         </p>
+        <div className="space-y-3">
+          {form.variantes.map((v, i) => (
+            <div key={v.id} className="border border-nb-black/10 p-4">
+              <div className="grid sm:grid-cols-5 gap-3">
+                <Field label="Color">
+                  <input
+                    className="input"
+                    value={v.color}
+                    onChange={(e) => updateVariant(v.id, { color: e.target.value })}
+                    placeholder="Ej: Blanco"
+                  />
+                </Field>
+                <Field label="Material">
+                  <input
+                    className="input"
+                    value={v.material}
+                    onChange={(e) => updateVariant(v.id, { material: e.target.value })}
+                  />
+                </Field>
+                <Field label="Medida">
+                  <input
+                    className="input"
+                    value={v.medida}
+                    onChange={(e) => updateVariant(v.id, { medida: e.target.value })}
+                  />
+                </Field>
+                <Field label="Stock">
+                  <input
+                    className="input"
+                    type="number"
+                    value={v.stock}
+                    onChange={(e) => updateVariant(v.id, { stock: e.target.value })}
+                  />
+                </Field>
+                <Field label="Precio extra">
+                  <input
+                    className="input"
+                    type="number"
+                    value={v.priceDelta}
+                    onChange={(e) => updateVariant(v.id, { priceDelta: e.target.value })}
+                    placeholder="0"
+                  />
+                </Field>
+              </div>
+              {form.variantes.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeVariant(v.id)}
+                  className="mt-3 text-xs text-nb-taupe hover:text-red-700 transition-colors flex items-center gap-1"
+                >
+                  <Trash2 size={12} /> Quitar esta variante
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addVariant}
+          className="mt-3 text-sm text-nb-wood hover:text-nb-roseDeep transition-colors"
+        >
+          + Agregar otra variante
+        </button>
       </section>
 
       <section>

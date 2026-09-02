@@ -8,10 +8,10 @@ export async function GET(req: NextRequest) {
   const admin = searchParams.get("admin") === "1";
 
   if (admin) {
-    return NextResponse.json(getAllProducts());
+    return NextResponse.json(await getAllProducts());
   }
 
-  const products = queryProducts({
+  const products = await queryProducts({
     categoria: (searchParams.get("categoria") as ProductCategory) || undefined,
     precioMin: searchParams.get("precioMin") ? Number(searchParams.get("precioMin")) : undefined,
     precioMax: searchParams.get("precioMax") ? Number(searchParams.get("precioMax")) : undefined,
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const product = createProduct({
+    const product = await createProduct({
       ...body,
       slug: body.slug || slugify(body.nombre),
     });

@@ -4,19 +4,19 @@ import type { Product, ProductCategory } from "../types";
 
 const COLLECTION = "products";
 
-export function getAllProducts(): Product[] {
+export async function getAllProducts(): Promise<Product[]> {
   return readAll<Product>(COLLECTION);
 }
 
-export function getActiveProducts(): Product[] {
-  return getAllProducts().filter((p) => p.activo);
+export async function getActiveProducts(): Promise<Product[]> {
+  return (await getAllProducts()).filter((p) => p.activo);
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return getAllProducts().find((p) => p.slug === slug);
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  return (await getAllProducts()).find((p) => p.slug === slug);
 }
 
-export function getProductById(id: string): Product | undefined {
+export async function getProductById(id: string): Promise<Product | undefined> {
   return readOne<Product>(COLLECTION, id);
 }
 
@@ -30,8 +30,8 @@ export interface ProductFilters {
   ordenar?: "destacados" | "mas-vendidos" | "precio-asc" | "precio-desc" | "novedades";
 }
 
-export function queryProducts(filters: ProductFilters): Product[] {
-  let items = getActiveProducts();
+export async function queryProducts(filters: ProductFilters): Promise<Product[]> {
+  let items = await getActiveProducts();
 
   if (filters.categoria) {
     items = items.filter((p) => p.categoria === filters.categoria);
@@ -73,8 +73,6 @@ export function queryProducts(filters: ProductFilters): Product[] {
     case "destacados":
       items = [...items].sort((a, b) => Number(b.destacado) - Number(a.destacado));
       break;
-    // "mas-vendidos" requeriría datos de ventas reales; se deja el orden
-    // por defecto (destacados primero) hasta incorporar analíticas de pedidos.
     default:
       items = [...items].sort((a, b) => Number(b.destacado) - Number(a.destacado));
   }
@@ -82,9 +80,9 @@ export function queryProducts(filters: ProductFilters): Product[] {
   return items;
 }
 
-export function createProduct(
+export async function createProduct(
   data: Omit<Product, "id" | "creadoEn" | "actualizadoEn">
-): Product {
+): Promise<Product> {
   const now = new Date().toISOString();
   const product: Product = {
     ...data,
@@ -95,11 +93,11 @@ export function createProduct(
   return upsert(COLLECTION, product);
 }
 
-export function updateProduct(
+export async function updateProduct(
   id: string,
   data: Partial<Omit<Product, "id" | "creadoEn">>
-): Product | undefined {
-  const existing = getProductById(id);
+): Promise<Product | undefined> {
+  const existing = await getProductById(id);
   if (!existing) return undefined;
   const updated: Product = {
     ...existing,
@@ -109,6 +107,6 @@ export function updateProduct(
   return upsert(COLLECTION, updated);
 }
 
-export function deleteProduct(id: string): void {
-  remove(COLLECTION, id);
+export async function deleteProduct(id: string): Promise<void> {
+  await remove(COLLECTION, id);
 }

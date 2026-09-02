@@ -38,9 +38,11 @@ interface Props {
   };
 }
 
-export default function ProductosPage({ searchParams }: Props) {
+export const dynamic = "force-dynamic";
+
+export default async function ProductosPage({ searchParams }: Props) {
   const categoria = searchParams.categoria as ProductCategory | undefined;
-  const products = queryProducts({
+  const products = await queryProducts({
     categoria,
     precioMin: searchParams.precioMin ? Number(searchParams.precioMin) : undefined,
     precioMax: searchParams.precioMax ? Number(searchParams.precioMax) : undefined,

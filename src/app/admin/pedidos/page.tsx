@@ -12,8 +12,8 @@ const ESTADOS_LABEL: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
-export default function AdminPedidosPage() {
-  const orders = getAllOrders();
+export default async function AdminPedidosPage() {
+  const orders = await getAllOrders();
 
   return (
     <div>

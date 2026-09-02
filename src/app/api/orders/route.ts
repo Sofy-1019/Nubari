@@ -4,7 +4,7 @@ import { getProductById } from "@/lib/db/products";
 import type { CartLine, Destino, ShippingQuoteOption } from "@/lib/types";
 
 export async function GET() {
-  return NextResponse.json(getAllOrders());
+  return NextResponse.json(await getAllOrders());
 }
 
 interface CreateOrderBody {
@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const items = body.lines
-      .map((line) => {
-        const product = getProductById(line.productId);
+    const itemsResolved = await Promise.all(
+      body.lines.map(async (line) => {
+        const product = await getProductById(line.productId);
         if (!product) return null;
         const variant = product.variantes.find((v) => v.id === line.variantId);
         return {
@@ -52,13 +52,14 @@ export async function POST(req: NextRequest) {
           imagen: product.imagenes[0],
         };
       })
-      .filter((x): x is NonNullable<typeof x> => x !== null);
+    );
+    const items = itemsResolved.filter((x): x is NonNullable<typeof x> => x !== null);
 
     const subtotal = items.reduce((acc, i) => acc + i.precioUnitario * i.cantidad, 0);
     const envioPrice = body.envio?.price ?? 0;
     const total = subtotal + envioPrice;
 
-    const order = createOrder({
+    const order = await createOrder({
       cliente: body.cliente,
       items,
       subtotal,

@@ -13,8 +13,12 @@ const CATEGORIES: { key: string; img: string }[] = [
   { key: "novedades", img: "/images/categories/novedades.svg" },
 ];
 
-export default function HomePage() {
-  const destacados = queryProducts({ ordenar: "destacados", soloDisponibles: false }).slice(0, 8);
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const destacados = (
+    await queryProducts({ ordenar: "destacados", soloDisponibles: false })
+  ).slice(0, 8);
 
   return (
     <div>

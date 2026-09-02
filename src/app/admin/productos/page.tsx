@@ -4,8 +4,8 @@ import { getAllProducts } from "@/lib/db/products";
 import { formatARS } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
 
-export default function AdminProductosPage() {
-  const products = getAllProducts();
+export default async function AdminProductosPage() {
+  const products = await getAllProducts();
 
   return (
     <div>
