@@ -59,6 +59,7 @@ export interface Product {
   agotado: boolean;
   activo: boolean;
   esProductoDePrueba?: boolean;
+  diasFabricacion?: number; // demora estimada de fabricación, en días hábiles
   imagenes: string[]; // rutas/URLs, en orden de exhibición
   variantes: ProductVariant[];
   logistica: ProductLogistics;

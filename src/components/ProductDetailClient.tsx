@@ -107,6 +107,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </div>
           </div>
 
+          {product.diasFabricacion != null && product.diasFabricacion > 0 && (
+            <p className="mt-4 text-sm text-nb-stone">
+              🛠️ Este producto se fabrica a pedido — demora estimada de{" "}
+              <strong className="text-nb-black">{product.diasFabricacion} días hábiles</strong> antes
+              de despacharse.
+            </p>
+          )}
+
           {product.variantes.length > 1 && (
             <div className="mt-6">
               <p className="text-xs tracking-widest2 text-nb-taupe mb-2">VARIANTE</p>

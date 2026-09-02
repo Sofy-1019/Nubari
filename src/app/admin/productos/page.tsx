@@ -29,7 +29,7 @@ export default function AdminProductosPage() {
                   <span className="text-[10px] text-nb-taupe">(prueba)</span>
                 )}
               </p>
-              <p className="text-xs text-nb-stone">SKU {p.sku} · Stock {p.stock}</p>
+              <p className="text-xs text-nb-stone">SKU {p.sku} · Stock interno: {p.stock}</p>
             </div>
             <p className="text-sm text-nb-ink w-24 text-right">{formatARS(p.precio)}</p>
             <span

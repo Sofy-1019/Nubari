@@ -1,10 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
     <footer className="bg-nb-black text-nb-bone mt-32">
       <div className="container-nb py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div>
+          <div className="relative w-14 h-14 rounded-full overflow-hidden mb-3">
+            <Image src="/images/logo/nubari-logo-circle.jpg" alt="Nubari" fill className="object-cover" />
+          </div>
           <p className="font-serif text-2xl">Nubari</p>
           <p className="text-xs tracking-widest2 text-nb-rose mt-1">DECO</p>
           <p className="text-sm text-nb-bone/60 mt-4 max-w-xs">

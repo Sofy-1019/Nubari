@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
+import { Loader2, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
 
 const CATEGORIES: ProductCategory[] = [
@@ -30,7 +32,8 @@ type FormState = {
   nuevo: boolean;
   agotado: boolean;
   activo: boolean;
-  imagenUrl: string;
+  imagenes: string[];
+  diasFabricacion: string;
   color: string;
   material: string;
   medida: string;
@@ -59,7 +62,8 @@ function fromProduct(p?: Product): FormState {
     nuevo: p?.nuevo ?? false,
     agotado: p?.agotado ?? false,
     activo: p?.activo ?? true,
-    imagenUrl: p?.imagenes[0] || "",
+    imagenes: p?.imagenes || [],
+    diasFabricacion: p?.diasFabricacion ? String(p.diasFabricacion) : "",
     color: v?.color || "",
     material: v?.material || "",
     medida: v?.medida || "",
@@ -78,10 +82,39 @@ export default function ProductForm({ initial }: Props) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(fromProduct(initial));
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  async function handleFilesSelected(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const body = new FormData();
+      Array.from(fileList).forEach((file) => body.append("files", file));
+      const res = await fetch("/api/upload", { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "No se pudieron subir las fotos.");
+        return;
+      }
+      set("imagenes", [...form.imagenes, ...data.urls]);
+    } catch {
+      setError("No se pudieron subir las fotos. Intentá nuevamente.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeImage(index: number) {
+    set(
+      "imagenes",
+      form.imagenes.filter((_, i) => i !== index)
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -107,7 +140,8 @@ export default function ProductForm({ initial }: Props) {
       agotado: form.agotado,
       activo: form.activo,
       esProductoDePrueba: initial?.esProductoDePrueba ?? false,
-      imagenes: form.imagenUrl ? [form.imagenUrl] : ["/images/products/placeholder.svg"],
+      diasFabricacion: form.diasFabricacion ? Number(form.diasFabricacion) : undefined,
+      imagenes: form.imagenes.length > 0 ? form.imagenes : ["/images/products/placeholder.svg"],
       variantes: [
         {
           id: initial?.variantes[0]?.id || `${Date.now()}`,
@@ -188,11 +222,18 @@ export default function ProductForm({ initial }: Props) {
           <Field label="Costo (opcional)">
             <input className="input" type="number" value={form.costo} onChange={(e) => set("costo", e.target.value)} />
           </Field>
-          <Field label="Stock total">
+          <Field label="Stock total (uso interno, el cliente no lo ve)">
             <input className="input" type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} />
           </Field>
-          <Field label="URL de imagen">
-            <input className="input" value={form.imagenUrl} onChange={(e) => set("imagenUrl", e.target.value)} placeholder="/images/products/mi-producto.jpg" />
+          <Field label="Demora de fabricación (días hábiles)">
+            <input
+              className="input"
+              type="number"
+              min="0"
+              value={form.diasFabricacion}
+              onChange={(e) => set("diasFabricacion", e.target.value)}
+              placeholder="Ej: 7"
+            />
           </Field>
         </div>
         <div className="flex flex-wrap gap-5 mt-4">
@@ -201,6 +242,49 @@ export default function ProductForm({ initial }: Props) {
           <Checkbox label="Agotado" checked={form.agotado} onChange={(v) => set("agotado", v)} />
           <Checkbox label="Activo" checked={form.activo} onChange={(v) => set("activo", v)} />
         </div>
+      </section>
+
+      <section>
+        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-4">FOTOS DEL PRODUCTO</h2>
+        <div className="flex flex-wrap gap-3 mb-3">
+          {form.imagenes.map((img, i) => (
+            <div key={img + i} className="relative w-24 h-24 border border-nb-black/15 overflow-hidden group">
+              <Image src={img} alt="" fill className="object-cover" />
+              <button
+                type="button"
+                onClick={() => removeImage(i)}
+                className="absolute top-1 right-1 bg-nb-black/70 text-nb-bone p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Quitar foto"
+              >
+                <Trash2 size={12} />
+              </button>
+              {i === 0 && (
+                <span className="absolute bottom-0 inset-x-0 bg-nb-black/70 text-nb-bone text-[10px] text-center py-0.5">
+                  Principal
+                </span>
+              )}
+            </div>
+          ))}
+          <label className="w-24 h-24 border border-dashed border-nb-black/30 flex flex-col items-center justify-center gap-1 text-nb-taupe text-xs cursor-pointer hover:border-nb-wood hover:text-nb-wood transition-colors">
+            {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+            <span>{uploading ? "Subiendo…" : "Agregar"}</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                handleFilesSelected(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+        <p className="text-xs text-nb-taupe">
+          La primera foto es la que se muestra en el catálogo. Podés subir varias y sacarlas
+          arrastrando el mouse encima y tocando la papelera.
+        </p>
       </section>
 
       <section>

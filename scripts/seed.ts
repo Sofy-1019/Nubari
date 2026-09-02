@@ -210,6 +210,7 @@ function buildProduct(seed: SeedInput, index: number): Product {
     agotado: false,
     activo: true,
     esProductoDePrueba: true,
+    diasFabricacion: 5 + (index % 4) * 3,
     imagenes: [imagen],
     variantes: seed.variantes.map((v) => ({
       id: nanoid(6),
