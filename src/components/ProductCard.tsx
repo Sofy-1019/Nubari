@@ -12,55 +12,55 @@ export default function ProductCard({ product }: { product: Product }) {
     product.precioAnterior && product.precioAnterior > product.precio
       ? Math.round(100 - (product.precio / product.precioAnterior) * 100)
       : null;
+  const cuota = Math.round(product.precio / 6);
 
   return (
     <div className="group">
       <Link href={`/productos/${product.slug}`} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-nb-sand">
+        <div className="relative aspect-[4/5] overflow-hidden bg-nb-card border border-nb-line/50">
           <Image
             src={product.imagenes[0]}
             alt={product.nombre}
             fill
-            className="object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
+            className="object-cover opacity-90 transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
           />
           {discount && (
-            <span className="absolute top-3 left-3 bg-nb-black text-nb-bone text-xs px-2.5 py-1">
+            <span className="absolute top-3 left-3 bg-nb-champagne text-nb-black text-[10px] tracking-wide px-2.5 py-1 font-medium">
               -{discount}%
             </span>
           )}
           {product.agotado && (
-            <span className="absolute top-3 right-3 bg-nb-bone/90 text-nb-black text-xs px-2.5 py-1">
+            <span className="absolute top-3 right-3 bg-nb-black/85 text-nb-beige text-[10px] px-2.5 py-1">
               Sin stock
             </span>
           )}
         </div>
       </Link>
 
-      <div className="mt-4 flex items-start justify-between gap-3">
-        <div>
-          <Link href={`/productos/${product.slug}`}>
-            <h3 className="font-serif text-lg text-nb-black leading-snug hover:text-nb-wood transition-colors">
-              {product.nombre}
-            </h3>
-          </Link>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="text-nb-ink">{formatARS(product.precio)}</span>
-            {product.precioAnterior && (
-              <span className="text-sm text-nb-taupe line-through">
-                {formatARS(product.precioAnterior)}
-              </span>
-            )}
-          </div>
+      <div className="mt-4">
+        <Link href={`/productos/${product.slug}`}>
+          <h3 className="font-serif text-lg text-nb-cream leading-snug hover:text-nb-champagne transition-colors">
+            {product.nombre}
+          </h3>
+        </Link>
+        <div className="mt-1 flex items-center gap-2">
+          <span className="text-nb-champagne">{formatARS(product.precio)}</span>
+          {product.precioAnterior && (
+            <span className="text-sm text-nb-beige/40 line-through">
+              {formatARS(product.precioAnterior)}
+            </span>
+          )}
         </div>
+        <p className="text-[11px] text-nb-beige/45 mt-0.5">6 cuotas de {formatARS(cuota)}</p>
       </div>
 
       <div className="mt-3 flex gap-2">
         <Link
           href={`/productos/${product.slug}`}
-          className="flex-1 text-center text-xs tracking-wide border border-nb-black py-2.5 hover:bg-nb-black hover:text-nb-bone transition-colors duration-200 focus-ring"
+          className="flex-1 text-center text-[11px] tracking-widest3 uppercase border border-nb-beige/30 text-nb-beige py-2.5 hover:border-nb-champagne hover:text-nb-champagne transition-colors duration-200 focus-ring"
         >
-          VER PRODUCTO
+          Ver producto
         </Link>
         <button
           disabled={product.agotado}
@@ -71,9 +71,9 @@ export default function ProductCard({ product }: { product: Product }) {
               cantidad: 1,
             })
           }
-          className="flex-1 text-center text-xs tracking-wide bg-nb-wood text-nb-bone py-2.5 hover:bg-nb-roseDeep transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed focus-ring"
+          className="flex-1 text-center text-[11px] tracking-widest3 uppercase bg-nb-champagne text-nb-black py-2.5 hover:bg-nb-gold transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed focus-ring"
         >
-          AGREGAR
+          Agregar
         </button>
       </div>
     </div>

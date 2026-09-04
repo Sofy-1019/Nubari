@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #f6f2ea;
-  color: #1a1817;
+  background-color: #0b0a09;
+  color: #f7f2ea;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -26,21 +26,21 @@ body {
 }
 
 ::selection {
-  background-color: #c99a6c;
-  color: #0f0e0d;
+  background-color: #c9a15a;
+  color: #0b0a09;
 }
 
 .focus-ring {
   outline-offset: 3px;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid #a9713f;
+  outline: 2px solid #c9a15a;
   outline-offset: 3px;
 }
 
 .container-nb {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1440px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1.25rem;
@@ -48,4 +48,12 @@ body {
 }
 @media (min-width: 768px) {
   .container-nb { padding-left: 3rem; padding-right: 3rem; }
+}
+
+@keyframes nb-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.nb-reveal {
+  animation: nb-fade-up 500ms cubic-bezier(.4,0,.2,1) both;
 }

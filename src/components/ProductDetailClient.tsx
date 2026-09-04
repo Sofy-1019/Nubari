@@ -18,7 +18,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const variant = product.variantes.find((v) => v.id === variantId);
   const precioFinal = product.precio + (variant?.priceDelta ?? 0);
-  const sinStock = product.agotado || (variant ? variant.stock <= 0 : product.stock <= 0);
+  const cuota = Math.round(precioFinal / 6);
+  const stockVariante = variant ? variant.stock : product.stock;
+  const sinStock = product.agotado || stockVariante <= 0;
 
   const whatsappHref = useMemo(
     () =>
@@ -46,10 +48,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   return (
     <div className="container-nb py-14">
+      <p className="text-xs text-nb-beige/45 mb-8">
+        Inicio / {product.categoria} / <span className="text-nb-beige/70">{product.nombre}</span>
+      </p>
+
       <div className="grid md:grid-cols-2 gap-12">
         {/* GALLERY */}
         <div>
-          <div className="relative aspect-[4/5] bg-nb-sand overflow-hidden">
+          <div className="relative aspect-[4/5] bg-nb-card border border-nb-line/50 overflow-hidden">
             <Image
               src={product.imagenes[activeImg]}
               alt={product.nombre}
@@ -65,7 +71,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   key={img}
                   onClick={() => setActiveImg(i)}
                   className={`relative w-16 h-16 overflow-hidden border ${
-                    i === activeImg ? "border-nb-wood" : "border-transparent"
+                    i === activeImg ? "border-nb-champagne" : "border-nb-line/50"
                   }`}
                 >
                   <Image src={img} alt="" fill className="object-cover" />
@@ -78,46 +84,47 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         {/* INFO */}
         <div>
           {product.esProductoDePrueba && (
-            <span className="inline-block text-[11px] tracking-wide bg-nb-sand text-nb-stone px-2 py-1 mb-3">
+            <span className="inline-block text-[10px] tracking-wide bg-nb-card border border-nb-line/60 text-nb-beige/50 px-2 py-1 mb-3">
               PRODUCTO DE PRUEBA
             </span>
           )}
-          <h1 className="font-serif text-3xl sm:text-4xl text-nb-black">{product.nombre}</h1>
+          <h1 className="font-serif text-3xl sm:text-4xl text-nb-cream">{product.nombre}</h1>
           <div className="mt-3 flex items-center gap-3">
-            <span className="text-xl text-nb-black">{formatARS(precioFinal)}</span>
+            <span className="text-2xl text-nb-champagne">{formatARS(precioFinal)}</span>
             {product.precioAnterior && (
-              <span className="text-nb-taupe line-through">{formatARS(product.precioAnterior)}</span>
+              <span className="text-nb-beige/40 line-through">{formatARS(product.precioAnterior)}</span>
             )}
           </div>
+          <p className="text-sm text-nb-beige/50 mt-1">6 cuotas sin interés de {formatARS(cuota)}</p>
 
-          <p className="mt-6 text-nb-stone leading-relaxed">{product.descripcion}</p>
+          <p className="mt-6 text-nb-beige/70 leading-relaxed">{product.descripcion}</p>
 
-          <div className="mt-6 grid grid-cols-3 gap-4 text-sm text-nb-stone border-y border-nb-black/10 py-4">
+          <div className="mt-6 grid grid-cols-3 gap-4 text-sm text-nb-beige/60 border-y border-nb-line/50 py-4">
             <div>
-              <p className="text-nb-taupe text-xs mb-1">Medidas</p>
+              <p className="text-nb-beige/35 text-xs mb-1">Medidas</p>
               {product.logistica.largoCm}×{product.logistica.anchoCm}×{product.logistica.altoCm} cm
             </div>
             <div>
-              <p className="text-nb-taupe text-xs mb-1">Peso</p>
+              <p className="text-nb-beige/35 text-xs mb-1">Peso</p>
               {product.logistica.pesoKg} kg
             </div>
             <div>
-              <p className="text-nb-taupe text-xs mb-1">Materiales</p>
+              <p className="text-nb-beige/35 text-xs mb-1">Materiales</p>
               {variant?.material || "Consultar"}
             </div>
           </div>
 
           {product.diasFabricacion != null && product.diasFabricacion > 0 && (
-            <p className="mt-4 text-sm text-nb-stone">
+            <p className="mt-4 text-sm text-nb-beige/60">
               🛠️ Este producto se fabrica a pedido — demora estimada de{" "}
-              <strong className="text-nb-black">{product.diasFabricacion} días hábiles</strong> antes
+              <strong className="text-nb-cream">{product.diasFabricacion} días hábiles</strong> antes
               de despacharse.
             </p>
           )}
 
           {product.variantes.length > 1 && (
             <div className="mt-6">
-              <p className="text-xs tracking-widest2 text-nb-taupe mb-2">VARIANTE</p>
+              <p className="text-[11px] tracking-widest3 uppercase text-nb-beige/45 mb-2">Color / Variante</p>
               <div className="flex flex-wrap gap-2">
                 {product.variantes.map((v) => (
                   <button
@@ -125,15 +132,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     onClick={() => setVariantId(v.id)}
                     className={`px-3.5 py-2 text-sm border transition-colors ${
                       v.id === variantId
-                        ? "border-nb-black bg-nb-black text-nb-bone"
-                        : "border-nb-black/25 text-nb-ink hover:border-nb-black"
+                        ? "border-nb-champagne bg-nb-champagne/10 text-nb-cream"
+                        : "border-nb-line/60 text-nb-beige/70 hover:border-nb-champagne/50"
                     }`}
                   >
                     {[v.color, v.material, v.medida].filter(Boolean).join(" · ")}
                     {v.priceDelta ? (
-                      <span className={v.id === variantId ? "text-nb-rose" : "text-nb-wood"}>
-                        {" "}+{formatARS(v.priceDelta)}
-                      </span>
+                      <span className="text-nb-champagne"> +{formatARS(v.priceDelta)}</span>
                     ) : null}
                   </button>
                 ))}
@@ -141,20 +146,25 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </div>
           )}
 
-          <div className="mt-6 flex items-center gap-4">
-            <p className="text-xs tracking-widest2 text-nb-taupe">CANTIDAD</p>
-            <div className="flex items-center border border-nb-black/20">
+          <p className="mt-5 flex items-center gap-2 text-xs text-nb-beige/55">
+            <span className={`w-2 h-2 rounded-full ${sinStock ? "bg-red-400" : "bg-green-400"}`} />
+            {sinStock ? "Sin stock disponible" : "Stock disponible"}
+          </p>
+
+          <div className="mt-5 flex items-center gap-4">
+            <p className="text-[11px] tracking-widest3 uppercase text-nb-beige/45">Cantidad</p>
+            <div className="flex items-center border border-nb-line/60">
               <button
                 onClick={() => setCantidad((q) => Math.max(1, q - 1))}
-                className="p-2.5 hover:bg-nb-sand transition-colors"
+                className="p-2.5 hover:bg-nb-card transition-colors text-nb-beige"
                 aria-label="Restar"
               >
                 <Minus size={14} />
               </button>
-              <span className="w-10 text-center text-sm">{cantidad}</span>
+              <span className="w-10 text-center text-sm text-nb-cream">{cantidad}</span>
               <button
                 onClick={() => setCantidad((q) => q + 1)}
-                className="p-2.5 hover:bg-nb-sand transition-colors"
+                className="p-2.5 hover:bg-nb-card transition-colors text-nb-beige"
                 aria-label="Sumar"
               >
                 <Plus size={14} />
@@ -166,16 +176,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <button
               onClick={handleAgregar}
               disabled={sinStock}
-              className="flex-1 py-3.5 border border-nb-black text-sm tracking-wide hover:bg-nb-black hover:text-nb-bone transition-colors duration-200 disabled:opacity-40 focus-ring"
+              className="flex-1 py-3.5 border border-nb-beige/40 text-nb-beige text-xs tracking-widest3 uppercase hover:border-nb-champagne hover:text-nb-champagne transition-colors duration-200 disabled:opacity-40 focus-ring"
             >
-              AGREGAR AL CARRITO
+              Agregar al carrito
             </button>
             <button
               onClick={handleComprarAhora}
               disabled={sinStock}
-              className="flex-1 py-3.5 bg-nb-wood text-nb-bone text-sm tracking-wide hover:bg-nb-roseDeep transition-colors duration-200 disabled:opacity-40 focus-ring"
+              className="flex-1 py-3.5 bg-nb-champagne text-nb-black text-xs tracking-widest3 uppercase hover:bg-nb-gold transition-colors duration-200 disabled:opacity-40 focus-ring"
             >
-              COMPRAR AHORA
+              Comprar ahora
             </button>
           </div>
 
@@ -183,7 +193,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-2 text-sm text-nb-stone hover:text-nb-wood transition-colors"
+            className="mt-4 inline-flex items-center gap-2 text-sm text-nb-beige/60 hover:text-nb-champagne transition-colors"
           >
             <MessageCircle size={16} /> Consultar por WhatsApp
           </a>

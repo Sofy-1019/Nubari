@@ -17,17 +17,17 @@ const CATEGORIES = [
 export default function CategoriasPage() {
   return (
     <div className="container-nb py-16">
-      <h1 className="font-serif text-4xl text-nb-black mb-10">Categorías</h1>
+      <h1 className="font-serif text-4xl text-nb-cream mb-10">Categorías</h1>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {CATEGORIES.map((c) => (
           <Link
             key={c.key}
             href={`/productos?categoria=${c.key}`}
-            className="group relative aspect-[4/3] overflow-hidden bg-nb-sand"
+            className="group relative aspect-[4/3] overflow-hidden bg-nb-card border border-nb-line/60"
           >
-            <Image src={c.img} alt={CATEGORY_LABELS[c.key]} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-            <div className="absolute inset-0 bg-nb-black/25 group-hover:bg-nb-black/40 transition-colors" />
-            <span className="absolute bottom-4 left-4 text-nb-bone text-lg font-serif">
+            <Image src={c.img} alt={CATEGORY_LABELS[c.key]} fill className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-nb-black/40 group-hover:bg-nb-black/25 transition-colors" />
+            <span className="absolute bottom-4 left-4 text-nb-cream text-lg font-serif">
               {CATEGORY_LABELS[c.key]}
             </span>
           </Link>

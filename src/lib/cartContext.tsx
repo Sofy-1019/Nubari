@@ -22,6 +22,22 @@ interface CartContextValue {
   setSelectedShipping: (opt: ShippingQuoteOption | null) => void;
   destino: { codigoPostal: string } | null;
   setDestino: (d: { codigoPostal: string } | null) => void;
+  direccion: {
+    direccion: string;
+    numero: string;
+    localidad: string;
+    provincia: string;
+    codigoPostal: string;
+  } | null;
+  setDireccion: (
+    d: {
+      direccion: string;
+      numero: string;
+      localidad: string;
+      provincia: string;
+      codigoPostal: string;
+    } | null
+  ) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -30,6 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<ShippingQuoteOption | null>(null);
   const [destino, setDestino] = useState<{ codigoPostal: string } | null>(null);
+  const [direccion, setDireccion] = useState<CartContextValue["direccion"]>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -40,6 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setLines(parsed.lines ?? []);
         setSelectedShipping(parsed.selectedShipping ?? null);
         setDestino(parsed.destino ?? null);
+        setDireccion(parsed.direccion ?? null);
       }
     } catch {
       // localStorage no disponible o dato corrupto: se ignora y arranca vacío
@@ -51,9 +69,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return;
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ lines, selectedShipping, destino })
+      JSON.stringify({ lines, selectedShipping, destino, direccion })
     );
-  }, [lines, selectedShipping, destino, hydrated]);
+  }, [lines, selectedShipping, destino, direccion, hydrated]);
 
   const addLine = useCallback((line: CartLine) => {
     setSelectedShipping(null); // el envío se recalcula si cambia el carrito
@@ -109,8 +127,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setSelectedShipping,
       destino,
       setDestino,
+      direccion,
+      setDireccion,
     }),
-    [lines, addLine, updateQuantity, removeLine, clearCart, selectedShipping, destino]
+    [lines, addLine, updateQuantity, removeLine, clearCart, selectedShipping, destino, direccion]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

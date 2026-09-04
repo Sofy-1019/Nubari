@@ -1,5 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1200">
-  <rect width="1920" height="1200" fill="#1a1817"/>
-  <rect x="24" y="24" width="1872" height="1152" fill="none" stroke="#c99a6c" stroke-width="1" opacity="0.35"/>
-  <text x="50%" y="50%" text-anchor="middle" font-family="Georgia, serif" font-size="75" fill="#c99a6c" letter-spacing="3" opacity="0.85">NUBARI · IMAGEN AMBIENTADA</text>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#171412"/>
+      <stop offset="45%" stop-color="#2a2118"/>
+      <stop offset="100%" stop-color="#0b0a09"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c9a15a" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#c9a15a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1200" fill="url(#g)"/>
+  <rect width="1920" height="600" fill="url(#g2)"/>
+  <circle cx="1480" cy="280" r="460" fill="none" stroke="#d9b98a" stroke-width="1" opacity="0.14"/>
+  <circle cx="260" cy="980" r="340" fill="none" stroke="#d9b98a" stroke-width="1" opacity="0.10"/>
+  <rect x="700" y="760" width="520" height="180" rx="6" fill="#211d1a" opacity="0.55"/>
+  <rect x="700" y="760" width="520" height="180" rx="6" fill="none" stroke="#c9a15a" stroke-width="1" opacity="0.25"/>
 </svg>
