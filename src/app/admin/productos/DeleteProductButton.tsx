@@ -24,9 +24,9 @@ export default function DeleteProductButton({ id }: { id: string }) {
       onClick={handleDelete}
       disabled={loading}
       aria-label="Eliminar producto"
-      className="text-nb-taupe hover:text-red-700 transition-colors disabled:opacity-40"
+      className="text-nb-beige/50 hover:text-red-400 transition-colors disabled:opacity-40"
     >
-      <Trash2 size={16} />
+      <Trash2 size={18} />
     </button>
   );
 }

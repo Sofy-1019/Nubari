@@ -123,17 +123,11 @@ export default function ProductForm({ initial }: Props) {
   }
 
   function removeImage(index: number) {
-    set(
-      "imagenes",
-      form.imagenes.filter((_, i) => i !== index)
-    );
+    set("imagenes", form.imagenes.filter((_, i) => i !== index));
   }
 
   function updateVariant(id: string, patch: Partial<FormVariant>) {
-    set(
-      "variantes",
-      form.variantes.map((v) => (v.id === id ? { ...v, ...patch } : v))
-    );
+    set("variantes", form.variantes.map((v) => (v.id === id ? { ...v, ...patch } : v)));
   }
 
   function addVariant() {
@@ -145,21 +139,16 @@ export default function ProductForm({ initial }: Props) {
 
   function removeVariant(id: string) {
     if (form.variantes.length <= 1) return;
-    set(
-      "variantes",
-      form.variantes.filter((v) => v.id !== id)
-    );
+    set("variantes", form.variantes.filter((v) => v.id !== id));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
     if (!form.nombre.trim() || !form.precio) {
       setError("Nombre y precio son obligatorios.");
       return;
     }
-
     const payload = {
       nombre: form.nombre,
       descripcion: form.descripcion,
@@ -198,14 +187,11 @@ export default function ProductForm({ initial }: Props) {
 
     setSaving(true);
     try {
-      const res = await fetch(
-        initial ? `/api/products/${initial.id}` : "/api/products",
-        {
-          method: initial ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(initial ? `/api/products/${initial.id}` : "/api/products", {
+        method: initial ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || "No se pudo guardar el producto.");
@@ -221,20 +207,15 @@ export default function ProductForm({ initial }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
+    <form onSubmit={handleSubmit} className="space-y-10 max-w-2xl">
       <section>
-        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-4">DATOS GENERALES</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-5">Datos generales</h2>
+        <div className="grid sm:grid-cols-2 gap-5">
           <Field label="Nombre" span2>
             <input className="input" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
           </Field>
           <Field label="Descripción" span2>
-            <textarea
-              className="input"
-              rows={3}
-              value={form.descripcion}
-              onChange={(e) => set("descripcion", e.target.value)}
-            />
+            <textarea className="input" rows={3} value={form.descripcion} onChange={(e) => set("descripcion", e.target.value)} />
           </Field>
           <Field label="Categoría">
             <select className="input" value={form.categoria} onChange={(e) => set("categoria", e.target.value as ProductCategory)}>
@@ -259,17 +240,10 @@ export default function ProductForm({ initial }: Props) {
             <input className="input" type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} />
           </Field>
           <Field label="Demora de fabricación (días hábiles)">
-            <input
-              className="input"
-              type="number"
-              min="0"
-              value={form.diasFabricacion}
-              onChange={(e) => set("diasFabricacion", e.target.value)}
-              placeholder="Ej: 7"
-            />
+            <input className="input" type="number" min="0" value={form.diasFabricacion} onChange={(e) => set("diasFabricacion", e.target.value)} placeholder="Ej: 7" />
           </Field>
         </div>
-        <div className="flex flex-wrap gap-5 mt-4">
+        <div className="flex flex-wrap gap-6 mt-5">
           <Checkbox label="Destacado" checked={form.destacado} onChange={(v) => set("destacado", v)} />
           <Checkbox label="Nuevo" checked={form.nuevo} onChange={(v) => set("nuevo", v)} />
           <Checkbox label="Agotado" checked={form.agotado} onChange={(v) => set("agotado", v)} />
@@ -278,27 +252,27 @@ export default function ProductForm({ initial }: Props) {
       </section>
 
       <section>
-        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-4">FOTOS DEL PRODUCTO</h2>
+        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-2">Fotos del producto</h2>
         <div className="flex flex-wrap gap-3 mb-3">
           {form.imagenes.map((img, i) => (
-            <div key={img + i} className="relative w-24 h-24 border border-nb-black/15 overflow-hidden group">
+            <div key={img + i} className="relative w-24 h-24 border border-nb-line/60 overflow-hidden group">
               <Image src={img} alt="" fill className="object-cover" />
               <button
                 type="button"
                 onClick={() => removeImage(i)}
-                className="absolute top-1 right-1 bg-nb-black/70 text-nb-bone p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 bg-nb-black/80 text-nb-cream p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Quitar foto"
               >
                 <Trash2 size={12} />
               </button>
               {i === 0 && (
-                <span className="absolute bottom-0 inset-x-0 bg-nb-black/70 text-nb-bone text-[10px] text-center py-0.5">
+                <span className="absolute bottom-0 inset-x-0 bg-nb-black/80 text-nb-champagne text-[10px] text-center py-0.5">
                   Principal
                 </span>
               )}
             </div>
           ))}
-          <label className="w-24 h-24 border border-dashed border-nb-black/30 flex flex-col items-center justify-center gap-1 text-nb-taupe text-xs cursor-pointer hover:border-nb-wood hover:text-nb-wood transition-colors">
+          <label className="w-24 h-24 border border-dashed border-nb-champagne/40 flex flex-col items-center justify-center gap-1 text-nb-champagne text-xs cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/10 transition-colors">
             {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
             <span>{uploading ? "Subiendo…" : "Agregar"}</span>
             <input
@@ -314,70 +288,48 @@ export default function ProductForm({ initial }: Props) {
             />
           </label>
         </div>
-        <p className="text-xs text-nb-taupe">
+        <p className="text-sm text-nb-beige/55">
           La primera foto es la que se muestra en el catálogo. Podés subir varias y sacarlas
-          arrastrando el mouse encima y tocando la papelera.
+          pasando el mouse por encima y tocando la papelera.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-2">VARIANTES (COLOR / MATERIAL)</h2>
-        <p className="text-xs text-nb-taupe mb-4">
+        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-2">
+          Variantes (color / material)
+        </h2>
+        <p className="text-sm text-nb-beige/55 mb-5">
           Agregá una fila por cada opción que el cliente pueda elegir. Si una opción cuesta
           más (por ejemplo, un color con pintura especial), cargá esa diferencia en
           "Precio extra" — se suma automáticamente al precio base cuando el cliente la elige.
         </p>
-        <div className="space-y-3">
-          {form.variantes.map((v, i) => (
-            <div key={v.id} className="border border-nb-black/10 p-4">
+        <div className="space-y-4">
+          {form.variantes.map((v) => (
+            <div key={v.id} className="border border-nb-line/60 bg-nb-card p-4">
               <div className="grid sm:grid-cols-5 gap-3">
                 <Field label="Color">
-                  <input
-                    className="input"
-                    value={v.color}
-                    onChange={(e) => updateVariant(v.id, { color: e.target.value })}
-                    placeholder="Ej: Blanco"
-                  />
+                  <input className="input" value={v.color} onChange={(e) => updateVariant(v.id, { color: e.target.value })} placeholder="Ej: Blanco" />
                 </Field>
                 <Field label="Material">
-                  <input
-                    className="input"
-                    value={v.material}
-                    onChange={(e) => updateVariant(v.id, { material: e.target.value })}
-                  />
+                  <input className="input" value={v.material} onChange={(e) => updateVariant(v.id, { material: e.target.value })} />
                 </Field>
                 <Field label="Medida">
-                  <input
-                    className="input"
-                    value={v.medida}
-                    onChange={(e) => updateVariant(v.id, { medida: e.target.value })}
-                  />
+                  <input className="input" value={v.medida} onChange={(e) => updateVariant(v.id, { medida: e.target.value })} />
                 </Field>
                 <Field label="Stock">
-                  <input
-                    className="input"
-                    type="number"
-                    value={v.stock}
-                    onChange={(e) => updateVariant(v.id, { stock: e.target.value })}
-                  />
+                  <input className="input" type="number" value={v.stock} onChange={(e) => updateVariant(v.id, { stock: e.target.value })} />
                 </Field>
                 <Field label="Precio extra">
-                  <input
-                    className="input"
-                    type="number"
-                    value={v.priceDelta}
-                    onChange={(e) => updateVariant(v.id, { priceDelta: e.target.value })}
-                    placeholder="0"
-                  />
+                  <input className="input" type="number" value={v.priceDelta} onChange={(e) => updateVariant(v.id, { priceDelta: e.target.value })} placeholder="0" />
                 </Field>
               </div>
               {form.variantes.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeVariant(v.id)}
-                  className="mt-3 text-xs text-nb-taupe hover:text-red-700 transition-colors flex items-center gap-1"
+                  className="mt-3 text-sm text-nb-beige/55 hover:text-red-400 transition-colors flex items-center gap-1"
                 >
-                  <Trash2 size={12} /> Quitar esta variante
+                  <Trash2 size={13} /> Quitar esta variante
                 </button>
               )}
             </div>
@@ -386,15 +338,15 @@ export default function ProductForm({ initial }: Props) {
         <button
           type="button"
           onClick={addVariant}
-          className="mt-3 text-sm text-nb-wood hover:text-nb-roseDeep transition-colors"
+          className="mt-4 text-sm text-nb-champagne hover:text-nb-gold transition-colors"
         >
           + Agregar otra variante
         </button>
       </section>
 
       <section>
-        <h2 className="text-xs tracking-widest2 text-nb-taupe mb-4">DATOS LOGÍSTICOS</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-5">Datos logísticos</h2>
+        <div className="grid sm:grid-cols-3 gap-5">
           <Field label="Peso (kg)">
             <input className="input" type="number" step="0.1" value={form.pesoKg} onChange={(e) => set("pesoKg", e.target.value)} />
           </Field>
@@ -414,7 +366,7 @@ export default function ProductForm({ initial }: Props) {
             <input className="input" type="number" value={form.valorDeclarado} onChange={(e) => set("valorDeclarado", e.target.value)} placeholder="Por defecto, el precio" />
           </Field>
         </div>
-        <div className="mt-4">
+        <div className="mt-5">
           <Checkbox
             label="Requiere cotización manual (producto muy grande)"
             checked={form.requiereCotizacionManual}
@@ -423,12 +375,12 @@ export default function ProductForm({ initial }: Props) {
         </div>
       </section>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       <button
         type="submit"
         disabled={saving}
-        className="px-6 py-3 bg-nb-black text-nb-bone text-sm hover:bg-nb-ink transition-colors disabled:opacity-50"
+        className="px-7 py-3.5 bg-nb-champagne text-nb-black text-sm font-medium hover:bg-nb-gold transition-colors disabled:opacity-50"
       >
         {saving ? "Guardando…" : initial ? "Guardar cambios" : "Crear producto"}
       </button>
@@ -436,14 +388,18 @@ export default function ProductForm({ initial }: Props) {
       <style jsx global>{`
         .input {
           width: 100%;
-          padding: 0.6rem 0.75rem;
-          border: 1px solid rgba(15, 14, 13, 0.2);
-          background: white;
-          font-size: 0.875rem;
+          padding: 0.7rem 0.85rem;
+          border: 1px solid #332e28;
+          background: rgba(11, 10, 9, 0.5);
+          color: #f7f2ea;
+          font-size: 0.95rem;
+        }
+        .input::placeholder {
+          color: rgba(233, 224, 209, 0.35);
         }
         .input:focus {
           outline: none;
-          border-color: #a9713f;
+          border-color: #c9a15a;
         }
       `}</style>
     </form>
@@ -453,24 +409,16 @@ export default function ProductForm({ initial }: Props) {
 function Field({ label, children, span2 }: { label: string; children: React.ReactNode; span2?: boolean }) {
   return (
     <div className={span2 ? "sm:col-span-2" : ""}>
-      <label className="block text-xs text-nb-taupe mb-1.5">{label}</label>
+      <label className="block text-sm text-nb-beige/70 mb-2">{label}</label>
       {children}
     </div>
   );
 }
 
-function Checkbox({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
+function Checkbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-nb-ink">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    <label className="flex items-center gap-2.5 text-sm text-nb-beige/85">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 accent-[#c9a15a]" />
       {label}
     </label>
   );

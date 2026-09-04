@@ -8,7 +8,7 @@ export default async function EditarProductoPage({ params }: { params: { id: str
 
   return (
     <div>
-      <h1 className="font-serif text-3xl text-nb-black mb-8">Editar producto</h1>
+      <h1 className="font-serif text-3xl text-nb-cream mb-8">Editar producto</h1>
       <ProductForm initial={product} />
     </div>
   );
