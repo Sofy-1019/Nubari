@@ -53,7 +53,7 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
             <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 nb-reveal">
               <Image
-                src="/images/logo/nubari-logo-full.jpg"
+                src="/images/logo/nubari-logo-circle.jpg"
                 alt="Nubari Deco"
                 fill
                 className="object-contain"

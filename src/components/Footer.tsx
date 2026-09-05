@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="container-nb py-16 grid grid-cols-2 md:grid-cols-5 gap-10">
         <div className="col-span-2">
           <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 ring-1 ring-nb-champagne/40">
-            <Image src="/images/logo/nubari-logo-circle.jpg" alt="Nubari" fill className="object-cover" />
+            <Image src="/images/logo/nubari-logo-full.jpg" alt="Nubari" fill className="object-cover" />
           </div>
           <p className="font-serif text-2xl text-nb-cream">NUBARI</p>
           <p className="text-[10px] tracking-widest2 text-nb-champagne mt-1">DECO</p>
