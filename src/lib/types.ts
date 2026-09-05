@@ -60,6 +60,7 @@ export interface Product {
   activo: boolean;
   esProductoDePrueba?: boolean;
   diasFabricacion?: number; // demora estimada de fabricación, en días hábiles
+  mercadoPagoLink?: string; // link de pago con tarjeta generado manualmente en Mercado Pago
   imagenes: string[]; // rutas/URLs, en orden de exhibición
   variantes: ProductVariant[];
   logistica: ProductLogistics;

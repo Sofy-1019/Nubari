@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { CreditCard } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import type { Product } from "@/lib/types";
 import { formatARS } from "@/lib/utils";
@@ -12,7 +13,6 @@ export default function ProductCard({ product }: { product: Product }) {
     product.precioAnterior && product.precioAnterior > product.precio
       ? Math.round(100 - (product.precio / product.precioAnterior) * 100)
       : null;
-  const cuota = Math.round(product.precio / 6);
 
   return (
     <div className="group">
@@ -52,7 +52,18 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
-        <p className="text-[11px] text-nb-beige/45 mt-0.5">6 cuotas de {formatARS(cuota)}</p>
+        <p className="text-[11px] text-nb-beige/45 mt-0.5">Precio por transferencia</p>
+        {product.mercadoPagoLink && (
+          <a
+            href={product.mercadoPagoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] text-nb-champagne hover:text-nb-gold transition-colors border border-nb-champagne/40 px-2 py-1"
+          >
+            <CreditCard size={11} /> 6 cuotas sin interés
+          </a>
+        )}
       </div>
 
       <div className="mt-3 flex gap-2">

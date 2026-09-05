@@ -43,6 +43,7 @@ type FormState = {
   activo: boolean;
   imagenes: string[];
   diasFabricacion: string;
+  mercadoPagoLink: string;
   variantes: FormVariant[];
   pesoKg: string;
   altoCm: string;
@@ -69,6 +70,7 @@ function fromProduct(p?: Product): FormState {
     activo: p?.activo ?? true,
     imagenes: p?.imagenes || [],
     diasFabricacion: p?.diasFabricacion ? String(p.diasFabricacion) : "",
+    mercadoPagoLink: p?.mercadoPagoLink || "",
     variantes:
       p && p.variantes.length > 0
         ? p.variantes.map((v) => ({
@@ -164,6 +166,7 @@ export default function ProductForm({ initial }: Props) {
       activo: form.activo,
       esProductoDePrueba: initial?.esProductoDePrueba ?? false,
       diasFabricacion: form.diasFabricacion ? Number(form.diasFabricacion) : undefined,
+      mercadoPagoLink: form.mercadoPagoLink.trim() || undefined,
       imagenes: form.imagenes.length > 0 ? form.imagenes : ["/images/products/placeholder.svg"],
       variantes: form.variantes.map((v) => ({
         id: v.id,
@@ -241,6 +244,20 @@ export default function ProductForm({ initial }: Props) {
           </Field>
           <Field label="Demora de fabricación (días hábiles)">
             <input className="input" type="number" min="0" value={form.diasFabricacion} onChange={(e) => set("diasFabricacion", e.target.value)} placeholder="Ej: 7" />
+          </Field>
+          <Field label="Link de pago con tarjeta (Mercado Pago)" span2>
+            <input
+              className="input"
+              value={form.mercadoPagoLink}
+              onChange={(e) => set("mercadoPagoLink", e.target.value)}
+              placeholder="https://mpago.la/..."
+            />
+            <p className="text-sm text-nb-beige/45 mt-1.5">
+              Se genera desde tu cuenta de Mercado Pago: "Cobrar" → "Crear link de pago", con
+              el monto de este producto. Si lo cargás acá, en la ficha va a aparecer un botón
+              de "6 cuotas sin interés" que lleva directo a ese link. Si lo dejás vacío, ese
+              botón no se muestra.
+            </p>
           </Field>
         </div>
         <div className="flex flex-wrap gap-6 mt-5">

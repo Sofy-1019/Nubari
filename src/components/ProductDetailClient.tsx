@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { MessageCircle, Minus, Plus } from "lucide-react";
+import { CreditCard, MessageCircle, Minus, Plus } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { buildWhatsAppLink, formatARS, productWhatsAppMessage } from "@/lib/utils";
 import { useCart } from "@/lib/cartContext";
@@ -18,7 +18,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const variant = product.variantes.find((v) => v.id === variantId);
   const precioFinal = product.precio + (variant?.priceDelta ?? 0);
-  const cuota = Math.round(precioFinal / 6);
   const stockVariante = variant ? variant.stock : product.stock;
   const sinStock = product.agotado || stockVariante <= 0;
 
@@ -95,7 +94,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <span className="text-nb-beige/40 line-through">{formatARS(product.precioAnterior)}</span>
             )}
           </div>
-          <p className="text-sm text-nb-beige/50 mt-1">6 cuotas sin interés de {formatARS(cuota)}</p>
+          <p className="text-sm text-nb-beige/50 mt-1">Precio pagando por transferencia</p>
+
+          {product.mercadoPagoLink && (
+            <a
+              href={product.mercadoPagoLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 border border-nb-champagne/60 text-nb-champagne text-xs tracking-widest3 uppercase px-4 py-2.5 hover:bg-nb-champagne/10 transition-colors"
+            >
+              <CreditCard size={15} /> 6 cuotas sin interés con tarjeta
+            </a>
+          )}
 
           <p className="mt-6 text-nb-beige/70 leading-relaxed">{product.descripcion}</p>
 

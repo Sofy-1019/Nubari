@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, Facebook } from "lucide-react";
 
 export default function Footer() {
@@ -6,8 +7,8 @@ export default function Footer() {
     <footer className="bg-nb-black text-nb-beige/80 mt-32 border-t border-nb-line/60">
       <div className="container-nb py-16 grid grid-cols-2 md:grid-cols-5 gap-10">
         <div className="col-span-2">
-          <div className="w-14 h-14 rounded-full border border-nb-champagne/50 flex items-center justify-center mb-3">
-            <span className="font-serif text-2xl text-nb-champagne">N</span>
+          <div className="relative w-14 h-14 rounded-full overflow-hidden mb-3 ring-1 ring-nb-champagne/40">
+            <Image src="/images/logo/nubari-logo-circle.jpg" alt="Nubari" fill className="object-cover" />
           </div>
           <p className="font-serif text-2xl text-nb-cream">NUBARI</p>
           <p className="text-[10px] tracking-widest2 text-nb-champagne mt-1">DECO</p>
