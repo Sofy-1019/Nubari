@@ -29,7 +29,7 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/40">
               <Image
-                src="/images/logo/nubari-logo-full.jpg"
+                src="/images/logo/nubari-logo-circle.png"
                 alt="Nubari"
                 fill
                 className="object-cover"
