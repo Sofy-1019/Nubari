@@ -50,12 +50,24 @@ export default async function HomePage() {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-nb-black via-nb-black/60 to-transparent" />
         <div className="container-nb relative pb-24 pt-40">
-          <p className="text-[11px] tracking-widest2 text-nb-champagne mb-5 nb-reveal">
-            DISEÑO · ESTILO · HOGAR
-          </p>
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl leading-[1.05] max-w-2xl nb-reveal">
-            Diseño que transforma tu hogar
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 nb-reveal">
+              <Image
+                src="/images/logo/nubari-logo-full.jpg"
+                alt="Nubari Deco"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <p className="text-[11px] tracking-widest2 text-nb-champagne mb-5 nb-reveal">
+                DISEÑO · ESTILO · HOGAR
+              </p>
+              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl leading-[1.05] max-w-2xl nb-reveal">
+                Diseño que transforma tu hogar
+              </h1>
+            </div>
+          </div>
           <p className="mt-6 text-nb-beige/80 max-w-md nb-reveal">
             Muebles y accesorios de diseño pensados para aportar estilo, funcionalidad y
             elegancia a cada espacio.

@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="bg-nb-black text-nb-beige/80 mt-32 border-t border-nb-line/60">
       <div className="container-nb py-16 grid grid-cols-2 md:grid-cols-5 gap-10">
         <div className="col-span-2">
-          <div className="relative w-14 h-14 rounded-full overflow-hidden mb-3 ring-1 ring-nb-champagne/40">
+          <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 ring-1 ring-nb-champagne/40">
             <Image src="/images/logo/nubari-logo-circle.jpg" alt="Nubari" fill className="object-cover" />
           </div>
           <p className="font-serif text-2xl text-nb-cream">NUBARI</p>

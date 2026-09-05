@@ -27,7 +27,7 @@ export default function Header() {
       <header className="bg-nb-black/95 backdrop-blur-md border-b border-nb-line/60">
         <div className="container-nb flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/40">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/40">
               <Image
                 src="/images/logo/nubari-logo-circle.jpg"
                 alt="Nubari"

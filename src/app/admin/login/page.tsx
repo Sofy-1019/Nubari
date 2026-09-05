@@ -2,12 +2,13 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,13 +52,23 @@ function LoginForm() {
       <label className="block text-[11px] tracking-wide text-nb-beige/55 mb-1.5">
         Contraseña
       </label>
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        autoFocus
-        className="w-full px-3.5 py-2.5 bg-nb-black/40 border border-nb-line/60 text-nb-cream text-sm focus-ring focus:border-nb-champagne outline-none"
-      />
+      <div className="relative">
+        <input
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoFocus
+          className="w-full px-3.5 py-2.5 pr-11 bg-nb-black/40 border border-nb-line/60 text-nb-cream text-sm focus-ring focus:border-nb-champagne outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword((v) => !v)}
+          aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-nb-beige/50 hover:text-nb-champagne transition-colors"
+        >
+          {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+        </button>
+      </div>
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
       <button
         type="submit"
