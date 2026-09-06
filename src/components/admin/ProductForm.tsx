@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
-import type { Product, ProductCategory } from "@/lib/types";
+import { ChevronDown, Loader2, Plus, Trash2, Upload } from "lucide-react";
+import type { Product, ProductCategory, TelaTipo } from "@/lib/types";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 const CATEGORIES: ProductCategory[] = [
@@ -16,6 +16,14 @@ const CATEGORIES: ProductCategory[] = [
   "novedades",
 ];
 
+const COLORES_ESTRUCTURA = ["Negro", "Blanco", "Dorado"] as const;
+const TERMINACION = "Satinado";
+
+const TELA_LABELS: Record<TelaTipo, string> = {
+  pana: "Pana",
+  "simil-cuero": "Símil cuero",
+};
+
 interface Props {
   initial?: Product;
 }
@@ -23,10 +31,19 @@ interface Props {
 type FormVariant = {
   id: string;
   color: string;
-  material: string;
-  medida: string;
-  stock: string;
   priceDelta: string;
+};
+
+type FormTelaColor = {
+  id: string;
+  nombre: string;
+  hex: string;
+  imagen?: string;
+};
+
+type FormTela = {
+  tipo: TelaTipo;
+  colores: FormTelaColor[];
 };
 
 type FormState = {
@@ -34,10 +51,7 @@ type FormState = {
   descripcion: string;
   categoria: ProductCategory;
   precio: string;
-  precioAnterior: string;
   costo: string;
-  sku: string;
-  stock: string;
   destacado: boolean;
   nuevo: boolean;
   agotado: boolean;
@@ -46,10 +60,11 @@ type FormState = {
   diasFabricacion: string;
   mercadoPagoLink: string;
   variantes: FormVariant[];
-  pesoKg: string;
+  telas: FormTela[];
   altoCm: string;
   anchoCm: string;
   largoCm: string;
+  pesoKg: string;
   bultos: string;
   valorDeclarado: string;
   requiereCotizacionManual: boolean;
@@ -61,10 +76,7 @@ function fromProduct(p?: Product): FormState {
     descripcion: p?.descripcion || "",
     categoria: p?.categoria || "banquetas",
     precio: p ? String(p.precio) : "",
-    precioAnterior: p?.precioAnterior ? String(p.precioAnterior) : "",
     costo: p?.costo ? String(p.costo) : "",
-    sku: p?.sku || "",
-    stock: p ? String(p.stock) : "1",
     destacado: p?.destacado ?? false,
     nuevo: p?.nuevo ?? false,
     agotado: p?.agotado ?? false,
@@ -76,17 +88,20 @@ function fromProduct(p?: Product): FormState {
       p && p.variantes.length > 0
         ? p.variantes.map((v) => ({
             id: v.id,
-            color: v.color || "",
-            material: v.material || "",
-            medida: v.medida || "",
-            stock: String(v.stock),
+            color: v.color || COLORES_ESTRUCTURA[0],
             priceDelta: v.priceDelta ? String(v.priceDelta) : "",
           }))
-        : [{ id: `${Date.now()}`, color: "", material: "", medida: "", stock: "1", priceDelta: "" }],
-    pesoKg: p ? String(p.logistica.pesoKg) : "",
+        : [{ id: `${Date.now()}`, color: COLORES_ESTRUCTURA[0], priceDelta: "" }],
+    telas: p?.telas
+      ? p.telas.map((t) => ({
+          tipo: t.tipo,
+          colores: t.colores.map((c) => ({ id: c.id, nombre: c.nombre, hex: c.hex, imagen: c.imagen })),
+        }))
+      : [],
     altoCm: p ? String(p.logistica.altoCm) : "",
     anchoCm: p ? String(p.logistica.anchoCm) : "",
     largoCm: p ? String(p.logistica.largoCm) : "",
+    pesoKg: p ? String(p.logistica.pesoKg) : "",
     bultos: p ? String(p.logistica.bultos) : "1",
     valorDeclarado: p?.logistica.valorDeclarado ? String(p.logistica.valorDeclarado) : "",
     requiereCotizacionManual: p?.logistica.requiereCotizacionManual ?? false,
@@ -98,20 +113,16 @@ export default function ProductForm({ initial }: Props) {
   const [form, setForm] = useState<FormState>(fromProduct(initial));
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingSwatch, setUploadingSwatch] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showLogistica, setShowLogistica] = useState(false);
-
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log("[Nubari] ProductForm montado correctamente (React funcionando en esta página).");
-  }, []);
+  const [showTelas, setShowTelas] = useState((initial?.telas?.length ?? 0) > 0);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
   async function handleFilesSelected(files: File[]) {
-    console.log("[Nubari] handleFilesSelected llamado con", files.length, "archivo(s)");
     if (files.length === 0) {
       window.alert("No se detectó ningún archivo seleccionado.");
       return;
@@ -125,7 +136,6 @@ export default function ProductForm({ initial }: Props) {
         urls.push(url);
       }
       set("imagenes", [...form.imagenes, ...urls]);
-      window.alert(`¡Listo! Se subieron ${urls.length} foto(s) correctamente.`);
     } catch (err) {
       const msg =
         "No se pudieron subir las fotos. Detalle técnico: " +
@@ -154,10 +164,9 @@ export default function ProductForm({ initial }: Props) {
   }
 
   function addVariant() {
-    set("variantes", [
-      ...form.variantes,
-      { id: `${Date.now()}`, color: "", material: "", medida: "", stock: "1", priceDelta: "" },
-    ]);
+    const usados = new Set(form.variantes.map((v) => v.color));
+    const siguiente = COLORES_ESTRUCTURA.find((c) => !usados.has(c)) || COLORES_ESTRUCTURA[0];
+    set("variantes", [...form.variantes, { id: `${Date.now()}`, color: siguiente, priceDelta: "" }]);
   }
 
   function removeVariant(id: string) {
@@ -165,22 +174,83 @@ export default function ProductForm({ initial }: Props) {
     set("variantes", form.variantes.filter((v) => v.id !== id));
   }
 
+  // ---- Telas ----
+  function toggleTela(tipo: TelaTipo) {
+    const existe = form.telas.some((t) => t.tipo === tipo);
+    if (existe) {
+      set("telas", form.telas.filter((t) => t.tipo !== tipo));
+    } else {
+      set("telas", [...form.telas, { tipo, colores: [] }]);
+    }
+  }
+
+  function addColorTela(tipo: TelaTipo) {
+    set(
+      "telas",
+      form.telas.map((t) =>
+        t.tipo === tipo
+          ? { ...t, colores: [...t.colores, { id: `${Date.now()}`, nombre: "", hex: "#8a7a63" }] }
+          : t
+      )
+    );
+  }
+
+  function updateColorTela(tipo: TelaTipo, id: string, patch: Partial<FormTelaColor>) {
+    set(
+      "telas",
+      form.telas.map((t) =>
+        t.tipo === tipo
+          ? { ...t, colores: t.colores.map((c) => (c.id === id ? { ...c, ...patch } : c)) }
+          : t
+      )
+    );
+  }
+
+  function removeColorTela(tipo: TelaTipo, id: string) {
+    set(
+      "telas",
+      form.telas.map((t) => (t.tipo === tipo ? { ...t, colores: t.colores.filter((c) => c.id !== id) } : t))
+    );
+  }
+
+  async function handleSwatchPhoto(tipo: TelaTipo, id: string, file: File) {
+    setUploadingSwatch(id);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      updateColorTela(tipo, id, { imagen: url });
+    } catch (err) {
+      window.alert(
+        "No se pudo subir la foto de la tela. " + (err instanceof Error ? err.message : String(err))
+      );
+    } finally {
+      setUploadingSwatch(null);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!form.nombre.trim() || !form.precio) {
-      setError("Nombre y precio son obligatorios.");
+    if (!form.nombre.trim()) {
+      setError("Falta el nombre del producto.");
       return;
     }
+    if (!form.precio || Number(form.precio) <= 0) {
+      setError("Falta el precio de venta (tiene que ser mayor a $0).");
+      return;
+    }
+    if (form.imagenes.length === 0) {
+      setError("Agregá al menos una foto del producto.");
+      return;
+    }
+
     const payload = {
       nombre: form.nombre,
       descripcion: form.descripcion,
       categoria: form.categoria,
       precio: Number(form.precio),
-      precioAnterior: form.precioAnterior ? Number(form.precioAnterior) : undefined,
       costo: form.costo ? Number(form.costo) : undefined,
-      sku: form.sku || `NB-${Date.now().toString().slice(-6)}`,
-      stock: Number(form.stock || 0),
+      sku: `NB-${Date.now().toString().slice(-6)}`,
+      stock: 9999,
       destacado: form.destacado,
       nuevo: form.nuevo,
       agotado: form.agotado,
@@ -188,15 +258,22 @@ export default function ProductForm({ initial }: Props) {
       esProductoDePrueba: initial?.esProductoDePrueba ?? false,
       diasFabricacion: form.diasFabricacion ? Number(form.diasFabricacion) : undefined,
       mercadoPagoLink: form.mercadoPagoLink.trim() || undefined,
-      imagenes: form.imagenes.length > 0 ? form.imagenes : ["/images/products/placeholder.svg"],
+      imagenes: form.imagenes,
       variantes: form.variantes.map((v) => ({
         id: v.id,
-        color: v.color || undefined,
-        material: v.material || undefined,
-        medida: v.medida || undefined,
-        stock: Number(v.stock || 0),
+        color: v.color,
+        material: TERMINACION,
+        stock: 9999,
         priceDelta: v.priceDelta ? Number(v.priceDelta) : undefined,
       })),
+      telas: form.telas
+        .filter((t) => t.colores.length > 0)
+        .map((t) => ({
+          tipo: t.tipo,
+          colores: t.colores
+            .filter((c) => c.nombre.trim())
+            .map((c) => ({ id: c.id, nombre: c.nombre, hex: c.hex, imagen: c.imagen })),
+        })),
       logistica: {
         pesoKg: Number(form.pesoKg || 0),
         altoCm: Number(form.altoCm || 0),
@@ -217,14 +294,20 @@ export default function ProductForm({ initial }: Props) {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "No se pudo guardar el producto.");
+        const data = await res.json().catch(() => null);
+        setError(
+          (data?.error || "No se pudo guardar el producto.") +
+            (data?.detail ? ` (${data.detail})` : "")
+        );
         return;
       }
       router.push("/admin/productos");
       router.refresh();
-    } catch {
-      setError("No se pudo guardar el producto.");
+    } catch (err) {
+      setError(
+        "No se pudo guardar el producto. Revisá tu conexión a internet. " +
+          (err instanceof Error ? err.message : "")
+      );
     } finally {
       setSaving(false);
     }
@@ -238,7 +321,7 @@ export default function ProductForm({ initial }: Props) {
           <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
           <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Fotos del producto</h2>
         </div>
-        <p className="text-sm text-nb-beige/55 mb-4">
+        <p className="text-sm text-nb-beige/70 mb-4">
           Sacale varias fotos con buena luz. La primera es la que ve el cliente en el catálogo.
         </p>
         <div className="flex flex-wrap gap-3 mb-3">
@@ -310,7 +393,7 @@ export default function ProductForm({ initial }: Props) {
           />
         </label>
         {form.imagenes.length > 0 && (
-          <p className="text-sm text-nb-beige/45 mt-2">
+          <p className="text-sm text-nb-beige/60 mt-2">
             Tocá cualquier foto de arriba para marcarla como portada.
           </p>
         )}
@@ -327,7 +410,7 @@ export default function ProductForm({ initial }: Props) {
             <input className="input" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} placeholder="Ej: Banqueta Nubari Tapizada" />
           </Field>
           <Field label="Descripción" span2>
-            <textarea className="input" rows={3} value={form.descripcion} onChange={(e) => set("descripcion", e.target.value)} placeholder="Contale al cliente de qué está hecho, para qué sirve, medidas destacadas..." />
+            <textarea className="input" rows={3} value={form.descripcion} onChange={(e) => set("descripcion", e.target.value)} placeholder="Contale al cliente de qué está hecho, para qué sirve..." />
           </Field>
           <Field label="Categoría">
             <select className="input" value={form.categoria} onChange={(e) => set("categoria", e.target.value as ProductCategory)}>
@@ -336,34 +419,17 @@ export default function ProductForm({ initial }: Props) {
               ))}
             </select>
           </Field>
-          <Field label="SKU (código interno, opcional)">
-            <input className="input" value={form.sku} onChange={(e) => set("sku", e.target.value)} placeholder="Se genera solo si lo dejás vacío" />
-          </Field>
-        </div>
-      </section>
-
-      {/* PASO 3: PRECIO Y STOCK */}
-      <section>
-        <div className="flex items-center gap-2 mb-5">
-          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
-          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Precio y stock</h2>
-        </div>
-        <div className="grid sm:grid-cols-2 gap-5">
           <Field label="Precio de venta">
             <input className="input" type="number" value={form.precio} onChange={(e) => set("precio", e.target.value)} placeholder="$" />
           </Field>
-          <Field label="Precio anterior (para mostrar descuento, opcional)">
-            <input className="input" type="number" value={form.precioAnterior} onChange={(e) => set("precioAnterior", e.target.value)} />
-          </Field>
-          <Field label="Costo — lo que te sale a vos (opcional, no lo ve el cliente)">
-            <input className="input" type="number" value={form.costo} onChange={(e) => set("costo", e.target.value)} />
-          </Field>
-          <Field label="Stock disponible">
-            <input className="input" type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} />
-          </Field>
-          <Field label="Demora de fabricación en días hábiles (opcional)">
-            <input className="input" type="number" min="0" value={form.diasFabricacion} onChange={(e) => set("diasFabricacion", e.target.value)} placeholder="Ej: 7" />
-          </Field>
+        </div>
+        <div className="flex flex-wrap gap-6 mt-5">
+          <Checkbox label="Destacado" checked={form.destacado} onChange={(v) => set("destacado", v)} />
+          <Checkbox label="Nuevo" checked={form.nuevo} onChange={(v) => set("nuevo", v)} />
+          <Checkbox label="Agotado / sin stock" checked={form.agotado} onChange={(v) => set("agotado", v)} />
+          <Checkbox label="Activo (visible en la tienda)" checked={form.activo} onChange={(v) => set("activo", v)} />
+        </div>
+        <div className="mt-5">
           <Field label="Link de pago con tarjeta — Mercado Pago (opcional)">
             <input
               className="input"
@@ -373,42 +439,55 @@ export default function ProductForm({ initial }: Props) {
             />
           </Field>
         </div>
-        <div className="flex flex-wrap gap-6 mt-5">
-          <Checkbox label="Destacado" checked={form.destacado} onChange={(v) => set("destacado", v)} />
-          <Checkbox label="Nuevo" checked={form.nuevo} onChange={(v) => set("nuevo", v)} />
-          <Checkbox label="Agotado" checked={form.agotado} onChange={(v) => set("agotado", v)} />
-          <Checkbox label="Activo (visible en la tienda)" checked={form.activo} onChange={(v) => set("activo", v)} />
+      </section>
+
+      {/* PASO 3: MEDIDAS */}
+      <section>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Medidas</h2>
+        </div>
+        <p className="text-sm text-nb-beige/70 mb-4">
+          En centímetros. El cliente las va a ver en la ficha del producto, y también se usan para calcular el envío.
+        </p>
+        <div className="grid grid-cols-3 gap-5">
+          <Field label="Alto (cm)">
+            <input className="input" type="number" value={form.altoCm} onChange={(e) => set("altoCm", e.target.value)} />
+          </Field>
+          <Field label="Ancho (cm)">
+            <input className="input" type="number" value={form.anchoCm} onChange={(e) => set("anchoCm", e.target.value)} />
+          </Field>
+          <Field label="Largo (cm)">
+            <input className="input" type="number" value={form.largoCm} onChange={(e) => set("largoCm", e.target.value)} />
+          </Field>
         </div>
       </section>
 
-      {/* PASO 4: VARIANTES */}
+      {/* PASO 4: COLOR DE ESTRUCTURA */}
       <section>
         <div className="flex items-center gap-2 mb-2">
           <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
-          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Colores / variantes (opcional)</h2>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Color de la estructura</h2>
         </div>
-        <p className="text-sm text-nb-beige/55 mb-5">
-          Si el producto viene en más de un color o material, agregá una fila por cada opción.
-          Si alguna sale más cara (ej. un color con pintura especial), poné la diferencia en
-          "Precio extra" — se suma sola al precio base cuando el cliente la elige.
+        <p className="text-sm text-nb-beige/70 mb-5">
+          Elegí qué colores de estructura ofrecés para este producto (terminación siempre {TERMINACION.toLowerCase()}).
+          Si alguno sale más caro, poné la diferencia en "Precio extra".
         </p>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {form.variantes.map((v) => (
             <div key={v.id} className="border border-nb-line/60 bg-nb-card p-4">
-              <div className="grid sm:grid-cols-5 gap-3">
-                <Field label="Color">
-                  <input className="input" value={v.color} onChange={(e) => updateVariant(v.id, { color: e.target.value })} placeholder="Ej: Blanco" />
+              <div className="grid sm:grid-cols-3 gap-3 items-end">
+                <Field label="Color de estructura">
+                  <select className="input" value={v.color} onChange={(e) => updateVariant(v.id, { color: e.target.value })}>
+                    {COLORES_ESTRUCTURA.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </Field>
-                <Field label="Material">
-                  <input className="input" value={v.material} onChange={(e) => updateVariant(v.id, { material: e.target.value })} />
+                <Field label="Terminación">
+                  <input className="input opacity-60" value={TERMINACION} disabled />
                 </Field>
-                <Field label="Medida">
-                  <input className="input" value={v.medida} onChange={(e) => updateVariant(v.id, { medida: e.target.value })} />
-                </Field>
-                <Field label="Stock">
-                  <input className="input" type="number" value={v.stock} onChange={(e) => updateVariant(v.id, { stock: e.target.value })} />
-                </Field>
-                <Field label="Precio extra">
+                <Field label="Precio extra (opcional)">
                   <input className="input" type="number" value={v.priceDelta} onChange={(e) => updateVariant(v.id, { priceDelta: e.target.value })} placeholder="0" />
                 </Field>
               </div>
@@ -416,31 +495,140 @@ export default function ProductForm({ initial }: Props) {
                 <button
                   type="button"
                   onClick={() => removeVariant(v.id)}
-                  className="mt-3 text-sm text-nb-beige/55 hover:text-red-400 transition-colors flex items-center gap-1"
+                  className="mt-3 text-sm text-nb-beige/70 hover:text-red-500 transition-colors flex items-center gap-1"
                 >
-                  <Trash2 size={13} /> Quitar esta variante
+                  <Trash2 size={13} /> Quitar este color
                 </button>
               )}
             </div>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={addVariant}
-          className="mt-4 text-sm text-nb-champagne hover:text-nb-gold transition-colors"
-        >
-          + Agregar otra variante
-        </button>
+        {form.variantes.length < COLORES_ESTRUCTURA.length && (
+          <button
+            type="button"
+            onClick={addVariant}
+            className="mt-4 text-sm text-nb-champagne hover:text-nb-gold transition-colors flex items-center gap-1"
+          >
+            <Plus size={14} /> Agregar otro color de estructura
+          </button>
+        )}
       </section>
 
-      {/* PASO 5: ENVÍO — escondido por defecto, como los "detalles avanzados" de ML */}
+      {/* PASO 5: TELAS */}
+      <section>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">5</span>
+            <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Tapizado (opcional)</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowTelas((v) => !v)}
+            className="text-xs tracking-widest3 uppercase border border-nb-champagne text-nb-champagne px-3 py-1.5 hover:bg-nb-champagne hover:text-nb-black transition-colors"
+          >
+            Elegir telas
+          </button>
+        </div>
+        {!showTelas && (
+          <p className="text-sm text-nb-beige/60 ml-8">
+            Si este producto se tapiza, tocá "Elegir telas" para armar las opciones de pana o símil cuero
+            que va a poder elegir el cliente.
+          </p>
+        )}
+        {showTelas && (
+          <div className="ml-8 space-y-6 mt-3">
+            <div className="flex gap-4">
+              {(Object.keys(TELA_LABELS) as TelaTipo[]).map((tipo) => (
+                <label key={tipo} className="flex items-center gap-2 text-sm text-nb-cream">
+                  <input
+                    type="checkbox"
+                    checked={form.telas.some((t) => t.tipo === tipo)}
+                    onChange={() => toggleTela(tipo)}
+                    className="w-4 h-4 accent-[#B25B3B]"
+                  />
+                  {TELA_LABELS[tipo]}
+                </label>
+              ))}
+            </div>
+
+            {form.telas.map((tela) => (
+              <div key={tela.tipo} className="border border-nb-line/60 bg-nb-card p-4">
+                <p className="text-sm uppercase tracking-widest3 text-nb-champagne mb-3">
+                  {TELA_LABELS[tela.tipo]} — colores del catálogo
+                </p>
+                <div className="flex flex-wrap gap-4 mb-4">
+                  {tela.colores.map((c) => (
+                    <div key={c.id} className="flex flex-col items-center gap-1.5 w-24">
+                      <label
+                        className="relative w-14 h-14 rounded-full border-2 border-nb-line/70 overflow-hidden cursor-pointer flex-shrink-0"
+                        style={{ backgroundColor: c.hex }}
+                        title="Tocar para subir una foto real de esta tela"
+                      >
+                        {c.imagen && <Image src={c.imagen} alt={c.nombre} fill className="object-cover" />}
+                        {uploadingSwatch === c.id && (
+                          <span className="absolute inset-0 flex items-center justify-center bg-nb-black/50">
+                            <Loader2 size={16} className="animate-spin text-nb-cream" />
+                          </span>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) handleSwatchPhoto(tela.tipo, c.id, file);
+                          }}
+                        />
+                      </label>
+                      <input
+                        className="input !p-1.5 !text-xs text-center"
+                        value={c.nombre}
+                        onChange={(ev) => updateColorTela(tela.tipo, c.id, { nombre: ev.target.value })}
+                        placeholder="Nombre"
+                      />
+                      <input
+                        type="color"
+                        value={c.hex}
+                        onChange={(ev) => updateColorTela(tela.tipo, c.id, { hex: ev.target.value })}
+                        className="w-8 h-6 border border-nb-line/60 cursor-pointer bg-transparent"
+                        title="Color de referencia (si no subís foto real)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeColorTela(tela.tipo, c.id)}
+                        className="text-nb-beige/60 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => addColorTela(tela.tipo)}
+                  className="text-sm text-nb-champagne hover:text-nb-gold transition-colors flex items-center gap-1"
+                >
+                  <Plus size={14} /> Agregar color de {TELA_LABELS[tela.tipo].toLowerCase()}
+                </button>
+                <p className="text-xs text-nb-beige/50 mt-2">
+                  Tocá el círculo para subir la foto real del color del catálogo (cuando la tengas). Mientras
+                  tanto, el color de al lado se usa como referencia.
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* PASO 6: ENVÍO — escondido por defecto */}
       <section>
         <button
           type="button"
           onClick={() => setShowLogistica((v) => !v)}
           className="flex items-center gap-2 w-full text-left"
         >
-          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">5</span>
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">6</span>
           <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne flex-1">
             Datos para calcular el envío
           </h2>
@@ -450,9 +638,9 @@ export default function ProductForm({ initial }: Props) {
           />
         </button>
         {!showLogistica && (
-          <p className="text-sm text-nb-beige/45 mt-2 ml-8">
-            Peso, medidas y bultos — tocá para completarlo (recomendado para que el cotizador
-            de envío funcione bien).
+          <p className="text-sm text-nb-beige/60 mt-2 ml-8">
+            Peso y cantidad de bultos — tocá para completarlo (recomendado para que el cotizador de envío
+            funcione bien).
           </p>
         )}
         {showLogistica && (
@@ -460,15 +648,6 @@ export default function ProductForm({ initial }: Props) {
             <div className="grid sm:grid-cols-3 gap-5">
               <Field label="Peso (kg)">
                 <input className="input" type="number" step="0.1" value={form.pesoKg} onChange={(e) => set("pesoKg", e.target.value)} />
-              </Field>
-              <Field label="Alto (cm)">
-                <input className="input" type="number" value={form.altoCm} onChange={(e) => set("altoCm", e.target.value)} />
-              </Field>
-              <Field label="Ancho (cm)">
-                <input className="input" type="number" value={form.anchoCm} onChange={(e) => set("anchoCm", e.target.value)} />
-              </Field>
-              <Field label="Largo (cm)">
-                <input className="input" type="number" value={form.largoCm} onChange={(e) => set("largoCm", e.target.value)} />
               </Field>
               <Field label="Cantidad de bultos">
                 <input className="input" type="number" value={form.bultos} onChange={(e) => set("bultos", e.target.value)} />
@@ -488,7 +667,9 @@ export default function ProductForm({ initial }: Props) {
         )}
       </section>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && (
+        <p className="text-sm text-red-600 bg-red-500/10 border border-red-500/30 px-4 py-3">{error}</p>
+      )}
 
       <button
         type="submit"
@@ -522,7 +703,7 @@ export default function ProductForm({ initial }: Props) {
 function Field({ label, children, span2 }: { label: string; children: React.ReactNode; span2?: boolean }) {
   return (
     <div className={span2 ? "sm:col-span-2" : ""}>
-      <label className="block text-sm text-nb-beige/70 mb-2">{label}</label>
+      <label className="block text-sm text-nb-beige/85 mb-2">{label}</label>
       {children}
     </div>
   );
@@ -530,7 +711,7 @@ function Field({ label, children, span2 }: { label: string; children: React.Reac
 
 function Checkbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-2.5 text-sm text-nb-beige/85">
+    <label className="flex items-center gap-2.5 text-sm text-nb-cream">
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 accent-[#B25B3B]" />
       {label}
     </label>

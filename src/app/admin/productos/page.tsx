@@ -32,7 +32,9 @@ export default async function AdminProductosPage() {
                   <span className="text-xs text-nb-beige/40">(prueba)</span>
                 )}
               </p>
-              <p className="text-sm text-nb-beige/55">SKU {p.sku} · Stock interno: {p.stock}</p>
+              <p className="text-sm text-nb-beige/55">
+                {p.categoria} · {p.agotado ? "Sin stock" : "Disponible"}
+              </p>
             </div>
             <p className="text-base text-nb-champagne w-28 text-right">{formatARS(p.precio)}</p>
             <span

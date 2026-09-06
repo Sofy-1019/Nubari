@@ -86,7 +86,7 @@ export default function CarritoPage() {
                     </Link>
                     {variant && (
                       <p className="text-sm text-nb-beige/50 mt-0.5">
-                        {[variant.color, variant.material, variant.medida].filter(Boolean).join(" · ")}
+                        {[variant.color, variant.material].filter(Boolean).join(" · ")}
                       </p>
                     )}
                     <p className="text-sm text-nb-champagne mt-1">{formatARS(precio)}</p>

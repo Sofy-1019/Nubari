@@ -26,7 +26,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       buildWhatsAppLink(
         productWhatsAppMessage({
           nombre: product.nombre,
-          variante: [variant?.color, variant?.material, variant?.medida]
+          variante: [variant?.color, variant?.material]
             .filter(Boolean)
             .join(" · "),
           precio: precioFinal,
@@ -146,7 +146,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         : "border-nb-line/60 text-nb-beige/70 hover:border-nb-champagne/50"
                     }`}
                   >
-                    {[v.color, v.material, v.medida].filter(Boolean).join(" · ")}
+                    {[v.color, v.material].filter(Boolean).join(" · ")}
                     {v.priceDelta ? (
                       <span className="text-nb-champagne"> +{formatARS(v.priceDelta)}</span>
                     ) : null}

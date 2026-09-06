@@ -12,12 +12,25 @@ export type ProductCategory =
 
 export interface ProductVariant {
   id: string;
-  color?: string;
-  material?: string;
-  medida?: string;
+  color?: string; // color de la estructura: Negro / Blanco / Dorado
+  material?: string; // terminación, siempre "Satinado"
   skuSuffix?: string;
   stock: number;
   priceDelta?: number; // ajuste opcional sobre el precio base
+}
+
+export type TelaTipo = "pana" | "simil-cuero";
+
+export interface TelaColor {
+  id: string;
+  nombre: string;
+  hex: string; // color de referencia para el círculo
+  imagen?: string; // opcional: foto real de la tela subida por el admin
+}
+
+export interface ProductTela {
+  tipo: TelaTipo;
+  colores: TelaColor[];
 }
 
 // Datos logísticos del producto COMPLETO (tal como se despacha, 1 o más bultos)
@@ -63,6 +76,7 @@ export interface Product {
   mercadoPagoLink?: string; // link de pago con tarjeta generado manualmente en Mercado Pago
   imagenes: string[]; // rutas/URLs, en orden de exhibición
   variantes: ProductVariant[];
+  telas?: ProductTela[];
   logistica: ProductLogistics;
   creadoEn: string;
   actualizadoEn: string;

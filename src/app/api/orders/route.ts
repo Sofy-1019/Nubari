@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
           productName: product.nombre,
           variantId: variant?.id,
           variantLabel: variant
-            ? [variant.color, variant.material, variant.medida].filter(Boolean).join(" · ")
+            ? [variant.color, variant.material].filter(Boolean).join(" · ")
             : undefined,
           cantidad: line.cantidad,
           precioUnitario: product.precio + (variant?.priceDelta ?? 0),
