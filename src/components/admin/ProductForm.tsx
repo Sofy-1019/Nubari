@@ -110,7 +110,6 @@ export default function ProductForm({ initial }: Props) {
   }
 
   async function handleFilesSelected(fileList: FileList | null) {
-    // eslint-disable-next-line no-console
     console.log("[Nubari] handleFilesSelected llamado con", fileList?.length, "archivo(s)");
     if (!fileList || fileList.length === 0) {
       window.alert("No se detectó ningún archivo seleccionado.");
@@ -119,27 +118,16 @@ export default function ProductForm({ initial }: Props) {
     setUploading(true);
     setError(null);
     try {
-      const body = new FormData();
-      Array.from(fileList).forEach((file) => body.append("files", file));
-      const res = await fetch("/api/upload", { method: "POST", body });
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch (parseErr) {
-        window.alert(
-          "El servidor respondió algo que no se pudo interpretar (status " +
-            res.status +
-            "). Avisale a soporte con este código."
-        );
-        return;
+      const { upload } = await import("@vercel/blob/client");
+      const urls: string[] = [];
+      for (const file of Array.from(fileList)) {
+        const blob = await upload(`productos/${Date.now()}-${file.name}`, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+        });
+        urls.push(blob.url);
       }
-      if (!res.ok) {
-        const msg = data?.error || `No se pudieron subir las fotos (status ${res.status}).`;
-        setError(msg);
-        window.alert("Error al subir: " + msg);
-        return;
-      }
-      set("imagenes", [...form.imagenes, ...data.urls]);
+      set("imagenes", [...form.imagenes, ...urls]);
     } catch (err) {
       const msg =
         "No se pudieron subir las fotos. Detalle técnico: " +
