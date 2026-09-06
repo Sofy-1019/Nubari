@@ -38,53 +38,68 @@ export default async function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative min-h-[92vh] flex items-end bg-nb-black text-nb-cream overflow-hidden">
-        <div className="absolute inset-0 opacity-80">
+      <section className="relative min-h-[92vh] flex items-center bg-nb-black text-nb-cream overflow-hidden">
+        <div className="absolute inset-0">
           <Image
-            src="/images/hero.svg"
+            src="/images/hero.jpg"
             alt="Banqueta Nubari ambientada en dormitorio"
             fill
             priority
             className="object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-nb-black via-nb-black/60 to-transparent" />
-        <div className="container-nb relative pb-24 pt-40">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
-            <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 nb-reveal">
-              <Image
-                src="/images/logo/nubari-logo-rect.jpg"
-                alt="Nubari Deco"
-                fill
-                className="object-contain"
-              />
+        <div className="absolute inset-0 bg-gradient-to-r from-nb-black via-nb-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-nb-black/40 via-transparent to-transparent" />
+
+        <div className="container-nb relative py-24 w-full">
+          <div className="max-w-lg">
+            <div className="flex items-center gap-3 mb-8 nb-reveal">
+              <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/40">
+                <Image
+                  src="/images/logo/nubari-logo-circle.png"
+                  alt="Nubari"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="leading-none">
+                <span className="font-serif text-2xl tracking-wide text-nb-cream block">NUBARI</span>
+                <span className="block text-[11px] tracking-widest2 text-nb-champagne mt-1">DECO</span>
+              </div>
             </div>
-            <div>
-              <p className="text-[11px] tracking-widest2 text-nb-champagne mb-5 nb-reveal">
-                DISEÑO · ESTILO · HOGAR
-              </p>
-              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl leading-[1.05] max-w-2xl nb-reveal">
-                Diseño que transforma tu hogar
-              </h1>
+
+            <h1 className="font-serif uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.08] nb-reveal">
+              Diseño que transforma tu hogar
+            </h1>
+
+            <p className="mt-6 text-nb-beige/80 nb-reveal">
+              Muebles y accesorios de diseño pensados para aportar estilo, funcionalidad y
+              elegancia a cada espacio.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-4 nb-reveal">
+              <Link
+                href="/productos"
+                className="px-8 py-3.5 bg-nb-champagne text-nb-black text-xs tracking-widest3 uppercase hover:bg-nb-gold transition-colors duration-200 focus-ring"
+              >
+                Ver colección →
+              </Link>
+              <Link
+                href="/nosotros"
+                className="px-8 py-3.5 border border-nb-beige/40 text-nb-beige text-xs tracking-widest3 uppercase hover:border-nb-champagne hover:text-nb-champagne transition-colors duration-200 focus-ring"
+              >
+                Descubrir Nubari
+              </Link>
             </div>
           </div>
-          <p className="mt-6 text-nb-beige/80 max-w-md nb-reveal">
-            Muebles y accesorios de diseño pensados para aportar estilo, funcionalidad y
-            elegancia a cada espacio.
-          </p>
-          <div className="mt-9 flex flex-wrap gap-4 nb-reveal">
-            <Link
-              href="/productos"
-              className="px-8 py-3.5 bg-nb-champagne text-nb-black text-xs tracking-widest3 uppercase hover:bg-nb-gold transition-colors duration-200 focus-ring"
-            >
-              Ver colección
-            </Link>
-            <Link
-              href="/nosotros"
-              className="px-8 py-3.5 border border-nb-beige/40 text-nb-beige text-xs tracking-widest3 uppercase hover:border-nb-champagne hover:text-nb-champagne transition-colors duration-200 focus-ring"
-            >
-              Descubrir Nubari
-            </Link>
+
+          <div className="mt-20 sm:mt-28 flex items-center gap-3 nb-reveal">
+            <span className="w-px h-9 bg-nb-champagne/50" />
+            <span className="text-xs tracking-widest3 uppercase text-nb-beige/70 leading-snug">
+              Espacios
+              <br />
+              que inspiran
+            </span>
           </div>
         </div>
       </section>
