@@ -48,26 +48,10 @@ export default async function HomePage() {
             className="object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-nb-black via-nb-black/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-nb-black/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-nb-black/85 via-nb-black/35 to-transparent" />
 
         <div className="container-nb relative py-24 w-full">
           <div className="max-w-lg">
-            <div className="flex items-center gap-3 mb-8 nb-reveal">
-              <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/40">
-                <Image
-                  src="/images/logo/nubari-logo-circle.png"
-                  alt="Nubari"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="leading-none">
-                <span className="font-serif text-2xl tracking-wide text-nb-cream block">NUBARI</span>
-                <span className="block text-[11px] tracking-widest2 text-nb-champagne mt-1">DECO</span>
-              </div>
-            </div>
-
             <h1 className="font-serif uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.08] nb-reveal">
               Diseño que transforma tu hogar
             </h1>
