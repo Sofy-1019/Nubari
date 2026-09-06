@@ -1,53 +1,54 @@
-import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { NextResponse } from "next/server";
 
 // ==========================================================================
-// Sube archivos de imagen reales a Vercel Blob Storage y devuelve las URLs
-// públicas para guardarlas en el producto.
+// Este endpoint YA NO recibe el archivo de la foto en sí (eso causaba el
+// error 413 "Payload Too Large": Vercel corta las funciones serverless en
+// ~4.5MB, y una foto de celular normal ya supera eso fácil).
 //
-// Requiere que el proyecto tenga conectado un "Blob store" en Vercel
-// (Storage → Create Database → Blob → Connect to Project). Una vez
-// conectado, Vercel agrega automáticamente la variable de entorno
-// BLOB_READ_WRITE_TOKEN — no hace falta configurarla a mano.
+// En cambio, el navegador del cliente sube el archivo DIRECTO a Vercel
+// Blob Storage. Este endpoint solo le da permiso ("token") para hacerlo,
+// sin que la foto pase por acá. Así no hay límite de tamaño real.
 // ==========================================================================
 
 export const runtime = "nodejs";
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request): Promise<NextResponse> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json(
       {
         error: "El almacenamiento de imágenes no está conectado todavía.",
         detail:
-          "En Vercel: Storage → Create Database → Blob → Connect to Project. " +
-          "Una vez conectado, esta función empieza a funcionar sin más pasos.",
+          "En Vercel: Storage → Create Database → Blob → Connect to Project.",
       },
       { status: 501 }
     );
   }
 
+  const body = (await request.json()) as HandleUploadBody;
+
   try {
-    const formData = await req.formData();
-    const files = formData.getAll("files") as File[];
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        return {
+          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+          addRandomSuffix: true,
+          tokenPayload: JSON.stringify({}),
+        };
+      },
+      onUploadCompleted: async () => {
+        // No hace falta hacer nada acá: la URL final se devuelve directo
+        // al navegador que hizo la subida.
+      },
+    });
 
-    if (!files || files.length === 0) {
-      return NextResponse.json({ error: "No se recibió ninguna imagen." }, { status: 400 });
-    }
-
-    const uploaded = await Promise.all(
-      files.map(async (file) => {
-        const ext = file.name.split(".").pop() || "jpg";
-        const key = `productos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const blob = await put(key, file, { access: "public" });
-        return blob.url;
-      })
-    );
-
-    return NextResponse.json({ urls: uploaded });
-  } catch (err) {
+    return NextResponse.json(jsonResponse);
+  } catch (error) {
     return NextResponse.json(
-      { error: "No se pudieron subir las imágenes", detail: (err as Error).message },
-      { status: 500 }
+      { error: (error as Error).message },
+      { status: 400 }
     );
   }
 }
