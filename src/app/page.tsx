@@ -40,6 +40,16 @@ export default async function HomePage() {
       <section className="bg-nb-black">
         <div className="container-nb grid lg:grid-cols-2 gap-12 items-center py-14 lg:py-20">
           <div className="max-w-lg nb-reveal">
+            <div className="relative w-40 h-40 sm:w-52 sm:h-52 mb-6">
+              <Image
+                src="/images/logo/nubari-logo-new.png"
+                alt="Nubari Deco"
+                fill
+                className="object-contain"
+                priority
+                quality={100}
+              />
+            </div>
             <h1 className="font-serif text-4xl sm:text-5xl md:text-[3.4rem] leading-[1.08] text-nb-cream">
               Diseño que se vive
             </h1>

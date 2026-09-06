@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
@@ -27,18 +26,8 @@ export default function Header() {
       <header className="bg-nb-black/95 backdrop-blur-md border-b border-nb-line/70">
         <div className="container-nb flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/60">
-              <Image
-                src="/images/logo/nubari-logo-new.png"
-                alt="Nubari Deco"
-                fill
-                className="object-cover"
-                priority
-                quality={100}
-              />
-            </div>
-            <div className="leading-none hidden xs:block">
-              <p className="font-serif text-lg tracking-wide text-nb-cream">NUBARI</p>
+            <div className="leading-none">
+              <p className="font-serif text-xl tracking-wide text-nb-cream">NUBARI</p>
               <p className="text-[9px] tracking-widest2 text-nb-champagne">DECO</p>
             </div>
           </Link>
