@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Loader2, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
@@ -98,27 +98,54 @@ export default function ProductForm({ initial }: Props) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log("[Nubari] ProductForm montado correctamente (React funcionando en esta página).");
+  }, []);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
   async function handleFilesSelected(fileList: FileList | null) {
-    if (!fileList || fileList.length === 0) return;
+    // eslint-disable-next-line no-console
+    console.log("[Nubari] handleFilesSelected llamado con", fileList?.length, "archivo(s)");
+    if (!fileList || fileList.length === 0) {
+      window.alert("No se detectó ningún archivo seleccionado.");
+      return;
+    }
     setUploading(true);
     setError(null);
     try {
       const body = new FormData();
       Array.from(fileList).forEach((file) => body.append("files", file));
       const res = await fetch("/api/upload", { method: "POST", body });
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        window.alert(
+          "El servidor respondió algo que no se pudo interpretar (status " +
+            res.status +
+            "). Avisale a soporte con este código."
+        );
+        return;
+      }
       if (!res.ok) {
-        setError(data.error || "No se pudieron subir las fotos.");
+        const msg = data?.error || `No se pudieron subir las fotos (status ${res.status}).`;
+        setError(msg);
+        window.alert("Error al subir: " + msg);
         return;
       }
       set("imagenes", [...form.imagenes, ...data.urls]);
-    } catch {
-      setError("No se pudieron subir las fotos. Intentá nuevamente.");
+    } catch (err) {
+      const msg =
+        "No se pudieron subir las fotos. Detalle técnico: " +
+        (err instanceof Error ? err.message : String(err));
+      setError(msg);
+      window.alert(msg);
     } finally {
       setUploading(false);
     }
@@ -289,21 +316,31 @@ export default function ProductForm({ initial }: Props) {
               )}
             </div>
           ))}
-          <label className="w-24 h-24 border border-dashed border-nb-champagne/40 flex flex-col items-center justify-center gap-1 text-nb-champagne text-xs cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/10 transition-colors">
+          <button
+            type="button"
+            onClick={() => {
+              console.log("[Nubari] Click en botón Agregar foto");
+              fileInputRef.current?.click();
+            }}
+            disabled={uploading}
+            className="w-24 h-24 border border-dashed border-nb-champagne/40 flex flex-col items-center justify-center gap-1 text-nb-champagne text-xs cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/10 transition-colors disabled:opacity-50"
+          >
             {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
             <span>{uploading ? "Subiendo…" : "Agregar"}</span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              disabled={uploading}
-              onChange={(e) => {
-                handleFilesSelected(e.target.files);
-                e.target.value = "";
-              }}
-            />
-          </label>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => {
+              console.log("[Nubari] onChange del input file disparado");
+              handleFilesSelected(e.target.files);
+              e.target.value = "";
+            }}
+          />
         </div>
         <p className="text-sm text-nb-beige/55">
           La primera foto es la que se muestra en el catálogo. Podés subir varias y sacarlas
