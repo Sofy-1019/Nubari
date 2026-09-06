@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
@@ -99,7 +99,6 @@ export default function ProductForm({ initial }: Props) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLogistica, setShowLogistica] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -142,6 +141,14 @@ export default function ProductForm({ initial }: Props) {
 
   function removeImage(index: number) {
     set("imagenes", form.imagenes.filter((_, i) => i !== index));
+  }
+
+  function setAsPortada(index: number) {
+    if (index === 0) return;
+    const nuevas = [...form.imagenes];
+    const [elegida] = nuevas.splice(index, 1);
+    nuevas.unshift(elegida);
+    set("imagenes", nuevas);
   }
 
   function updateVariant(id: string, patch: Partial<FormVariant>) {
@@ -238,45 +245,74 @@ export default function ProductForm({ initial }: Props) {
         </p>
         <div className="flex flex-wrap gap-3 mb-3">
           {form.imagenes.map((img, i) => (
-            <div key={img + i} className="relative w-24 h-24 border border-nb-line/60 overflow-hidden group">
+            <div
+              key={img + i}
+              className={`relative w-24 h-24 border overflow-hidden group cursor-pointer ${
+                i === 0 ? "border-nb-champagne" : "border-nb-line/60"
+              }`}
+              onClick={() => setAsPortada(i)}
+              title="Tocar para usar como foto de portada"
+            >
               <Image src={img} alt="" fill className="object-cover" />
               <button
                 type="button"
-                onClick={() => removeImage(i)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeImage(i);
+                }}
                 className="absolute top-1 right-1 bg-nb-black/80 text-nb-cream p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Quitar foto"
               >
                 <Trash2 size={12} />
               </button>
               {i === 0 && (
-                <span className="absolute bottom-0 inset-x-0 bg-nb-black/80 text-nb-champagne text-[10px] text-center py-0.5">
-                  Principal
+                <span className="absolute bottom-0 inset-x-0 bg-nb-champagne text-nb-black text-[10px] text-center py-0.5 font-medium">
+                  Portada
                 </span>
               )}
             </div>
           ))}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="w-24 h-24 border border-dashed border-nb-champagne/40 flex flex-col items-center justify-center gap-1 text-nb-champagne text-xs cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/10 transition-colors disabled:opacity-50"
-          >
-            {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-            <span>{uploading ? "Subiendo…" : "Agregar"}</span>
-          </button>
+        </div>
+
+        <label className="block w-full border-2 border-dashed border-nb-champagne/50 rounded p-6 text-center cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/5 transition-colors">
+          {uploading ? (
+            <span className="flex flex-col items-center gap-2 text-nb-champagne">
+              <Loader2 size={22} className="animate-spin" />
+              Subiendo fotos…
+            </span>
+          ) : (
+            <span className="flex flex-col items-center gap-2 text-nb-champagne">
+              <Upload size={22} />
+              Tocá acá para elegir fotos desde tu celular o compu
+            </span>
+          )}
           <input
-            ref={fileInputRef}
             type="file"
             accept="image/*"
             multiple
-            className="hidden"
             disabled={uploading}
             onChange={(e) => {
               handleFilesSelected(e.target.files);
               e.target.value = "";
             }}
+            style={{
+              position: "absolute",
+              width: "1px",
+              height: "1px",
+              padding: 0,
+              margin: "-1px",
+              overflow: "hidden",
+              clip: "rect(0,0,0,0)",
+              whiteSpace: "nowrap",
+              border: 0,
+            }}
           />
-        </div>
+        </label>
+        {form.imagenes.length > 0 && (
+          <p className="text-sm text-nb-beige/45 mt-2">
+            Tocá cualquier foto de arriba para marcarla como portada.
+          </p>
+        )}
       </section>
 
       {/* PASO 2: LO BÁSICO */}
