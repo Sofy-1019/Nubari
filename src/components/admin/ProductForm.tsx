@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Loader2, Trash2 } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
 
 const CATEGORIES: ProductCategory[] = [
@@ -274,18 +274,10 @@ export default function ProductForm({ initial }: Props) {
           ))}
         </div>
 
-        <label className="block w-full border-2 border-dashed border-nb-champagne/50 rounded p-6 text-center cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/5 transition-colors">
-          {uploading ? (
-            <span className="flex flex-col items-center gap-2 text-nb-champagne">
-              <Loader2 size={22} className="animate-spin" />
-              Subiendo fotos…
-            </span>
-          ) : (
-            <span className="flex flex-col items-center gap-2 text-nb-champagne">
-              <Upload size={22} />
-              Tocá acá para elegir fotos desde tu celular o compu
-            </span>
-          )}
+        <div className="border-2 border-dashed border-nb-champagne/50 rounded p-6">
+          <p className="text-center text-nb-champagne mb-3">
+            {uploading ? "Subiendo fotos…" : "Elegí una o varias fotos:"}
+          </p>
           <input
             type="file"
             accept="image/*"
@@ -295,19 +287,9 @@ export default function ProductForm({ initial }: Props) {
               handleFilesSelected(e.target.files);
               e.target.value = "";
             }}
-            style={{
-              position: "absolute",
-              width: "1px",
-              height: "1px",
-              padding: 0,
-              margin: "-1px",
-              overflow: "hidden",
-              clip: "rect(0,0,0,0)",
-              whiteSpace: "nowrap",
-              border: 0,
-            }}
+            className="block mx-auto text-nb-cream text-sm"
           />
-        </label>
+        </div>
         {form.imagenes.length > 0 && (
           <p className="text-sm text-nb-beige/45 mt-2">
             Tocá cualquier foto de arriba para marcarla como portada.
