@@ -25,15 +25,16 @@ export default function Header() {
     <div className="sticky top-0 z-50">
       <TopBar />
       <header className="bg-nb-black/95 backdrop-blur-md border-b border-nb-line/60">
-        <div className="container-nb flex items-center justify-between h-28">
+        <div className="container-nb flex items-center justify-between h-36">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/40">
+            <div className="relative w-32 h-32 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-nb-champagne/70 shadow-[0_0_24px_rgba(201,161,90,0.35)]">
               <Image
                 src="/images/logo/nubari-logo-circle.png"
                 alt="Nubari"
                 fill
                 className="object-cover"
                 priority
+                quality={100}
               />
             </div>
             <span className="hidden sm:block leading-none">
