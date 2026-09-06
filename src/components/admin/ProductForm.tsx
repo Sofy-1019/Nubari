@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronDown, Loader2, Trash2 } from "lucide-react";
+import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
 
 const CATEGORIES: ProductCategory[] = [
@@ -109,9 +109,9 @@ export default function ProductForm({ initial }: Props) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  async function handleFilesSelected(fileList: FileList | null) {
-    console.log("[Nubari] handleFilesSelected llamado con", fileList?.length, "archivo(s)");
-    if (!fileList || fileList.length === 0) {
+  async function handleFilesSelected(files: File[]) {
+    console.log("[Nubari] handleFilesSelected llamado con", files.length, "archivo(s)");
+    if (files.length === 0) {
       window.alert("No se detectó ningún archivo seleccionado.");
       return;
     }
@@ -120,7 +120,7 @@ export default function ProductForm({ initial }: Props) {
     try {
       const { upload } = await import("@vercel/blob/client");
       const urls: string[] = [];
-      for (const file of Array.from(fileList)) {
+      for (const file of files) {
         const blob = await upload(`productos/${Date.now()}-${file.name}`, file, {
           access: "public",
           handleUploadUrl: "/api/upload",
@@ -128,6 +128,7 @@ export default function ProductForm({ initial }: Props) {
         urls.push(blob.url);
       }
       set("imagenes", [...form.imagenes, ...urls]);
+      window.alert(`¡Listo! Se subieron ${urls.length} foto(s) correctamente.`);
     } catch (err) {
       const msg =
         "No se pudieron subir las fotos. Detalle técnico: " +
@@ -236,19 +237,6 @@ export default function ProductForm({ initial }: Props) {
     <form onSubmit={handleSubmit} className="space-y-10 max-w-2xl">
       {/* PASO 1: FOTOS — primero, como en Mercado Libre */}
       <section>
-        <div className="bg-red-950/40 border-2 border-red-500 p-4 mb-6">
-          <p className="text-red-300 text-sm font-bold mb-2">
-            🔧 CUADRO DE PRUEBA (temporal, para encontrar el problema)
-          </p>
-          <input
-            type="file"
-            onChange={(e) => {
-              window.alert(
-                "¡FUNCIONÓ! Se detectó el archivo: " + (e.target.files?.[0]?.name || "ninguno")
-              );
-            }}
-          />
-        </div>
         <div className="flex items-center gap-2 mb-2">
           <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
           <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Fotos del producto</h2>
@@ -287,22 +275,43 @@ export default function ProductForm({ initial }: Props) {
           ))}
         </div>
 
-        <div className="border-2 border-dashed border-nb-champagne/50 rounded p-6">
-          <p className="text-center text-nb-champagne mb-3">
-            {uploading ? "Subiendo fotos…" : "Elegí una o varias fotos:"}
-          </p>
+        <label className="block w-full border-2 border-dashed border-nb-champagne/50 rounded p-6 text-center cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/5 transition-colors">
+          <span className="flex flex-col items-center gap-2 text-nb-champagne pointer-events-none">
+            {uploading ? (
+              <>
+                <Loader2 size={22} className="animate-spin" />
+                Subiendo fotos…
+              </>
+            ) : (
+              <>
+                <Upload size={22} />
+                Tocá acá para elegir fotos desde tu celular o compu
+              </>
+            )}
+          </span>
           <input
             type="file"
             accept="image/*"
             multiple
             disabled={uploading}
             onChange={(e) => {
-              handleFilesSelected(e.target.files);
+              const files = e.target.files ? Array.from(e.target.files) : [];
               e.target.value = "";
+              handleFilesSelected(files);
             }}
-            className="block mx-auto text-nb-cream text-sm"
+            style={{
+              position: "absolute",
+              width: "1px",
+              height: "1px",
+              padding: 0,
+              margin: "-1px",
+              overflow: "hidden",
+              clip: "rect(0,0,0,0)",
+              whiteSpace: "nowrap",
+              border: 0,
+            }}
           />
-        </div>
+        </label>
         {form.imagenes.length > 0 && (
           <p className="text-sm text-nb-beige/45 mt-2">
             Tocá cualquier foto de arriba para marcarla como portada.
