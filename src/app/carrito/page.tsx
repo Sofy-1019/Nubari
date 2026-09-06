@@ -39,7 +39,8 @@ export default function CarritoPage() {
     const p = products[l.productId];
     if (!p) return acc;
     const variant = p.variantes.find((v) => v.id === l.variantId);
-    return acc + (p.precio + (variant?.priceDelta ?? 0)) * l.cantidad;
+    const largo = p.largos?.find((m) => m.id === l.largoId);
+    return acc + (p.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0)) * l.cantidad;
   }, 0);
 
   const envio = selectedShipping?.price ?? 0;
@@ -71,10 +72,11 @@ export default function CarritoPage() {
               const p = products[line.productId];
               if (!p) return null;
               const variant = p.variantes.find((v) => v.id === line.variantId);
-              const precio = p.precio + (variant?.priceDelta ?? 0);
+              const largo = p.largos?.find((m) => m.id === line.largoId);
+              const precio = p.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0);
               return (
                 <div
-                  key={`${line.productId}-${line.variantId}`}
+                  key={`${line.productId}-${line.variantId}-${line.largoId}`}
                   className="flex gap-4 border-b border-nb-line/50 pb-6"
                 >
                   <div className="relative w-24 h-28 bg-nb-card border border-nb-line/50 flex-shrink-0 overflow-hidden">
@@ -84,9 +86,11 @@ export default function CarritoPage() {
                     <Link href={`/productos/${p.slug}`} className="font-serif text-lg text-nb-cream hover:text-nb-champagne">
                       {p.nombre}
                     </Link>
-                    {variant && (
+                    {(variant || largo) && (
                       <p className="text-sm text-nb-beige/50 mt-0.5">
-                        {[variant.color, variant.material].filter(Boolean).join(" · ")}
+                        {[variant?.color, variant?.material, largo ? `${largo.cm} cm` : null]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </p>
                     )}
                     <p className="text-sm text-nb-champagne mt-1">{formatARS(precio)}</p>
@@ -94,21 +98,21 @@ export default function CarritoPage() {
                     <div className="mt-3 flex items-center gap-4">
                       <div className="flex items-center border border-nb-line/60">
                         <button
-                          onClick={() => updateQuantity(line.productId, line.variantId, line.cantidad - 1)}
+                          onClick={() => updateQuantity(line.productId, line.variantId, line.largoId, line.cantidad - 1)}
                           className="p-2 hover:bg-nb-black/40 transition-colors text-nb-beige"
                         >
                           <Minus size={13} />
                         </button>
                         <span className="w-8 text-center text-sm text-nb-cream">{line.cantidad}</span>
                         <button
-                          onClick={() => updateQuantity(line.productId, line.variantId, line.cantidad + 1)}
+                          onClick={() => updateQuantity(line.productId, line.variantId, line.largoId, line.cantidad + 1)}
                           className="p-2 hover:bg-nb-black/40 transition-colors text-nb-beige"
                         >
                           <Plus size={13} />
                         </button>
                       </div>
                       <button
-                        onClick={() => removeLine(line.productId, line.variantId)}
+                        onClick={() => removeLine(line.productId, line.variantId, line.largoId)}
                         className="text-nb-beige/40 hover:text-red-400 transition-colors"
                         aria-label="Eliminar"
                       >

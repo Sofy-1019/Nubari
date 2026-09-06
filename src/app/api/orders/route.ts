@@ -40,15 +40,16 @@ export async function POST(req: NextRequest) {
         const product = await getProductById(line.productId);
         if (!product) return null;
         const variant = product.variantes.find((v) => v.id === line.variantId);
+        const largo = product.largos?.find((m) => m.id === line.largoId);
         return {
           productId: product.id,
           productName: product.nombre,
           variantId: variant?.id,
-          variantLabel: variant
-            ? [variant.color, variant.material].filter(Boolean).join(" · ")
-            : undefined,
+          variantLabel: [variant?.color, variant?.material, largo ? `${largo.cm} cm` : null]
+            .filter(Boolean)
+            .join(" · ") || undefined,
           cantidad: line.cantidad,
-          precioUnitario: product.precio + (variant?.priceDelta ?? 0),
+          precioUnitario: product.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0),
           imagen: product.imagenes[0],
         };
       })

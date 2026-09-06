@@ -55,7 +55,8 @@ export default function CheckoutPage() {
     const p = products[l.productId];
     if (!p) return acc;
     const variant = p.variantes.find((v) => v.id === l.variantId);
-    return acc + (p.precio + (variant?.priceDelta ?? 0)) * l.cantidad;
+    const largo = p.largos?.find((m) => m.id === l.largoId);
+    return acc + (p.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0)) * l.cantidad;
   }, 0);
   const total = subtotal + (selectedShipping?.price ?? 0);
 
@@ -167,12 +168,16 @@ export default function CheckoutPage() {
             {lines.map((l) => {
               const p = products[l.productId];
               if (!p) return null;
+              const variant = p.variantes.find((v) => v.id === l.variantId);
+              const largo = p.largos?.find((m) => m.id === l.largoId);
+              const precio = p.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0);
               return (
-                <div key={`${l.productId}-${l.variantId}`} className="flex justify-between text-nb-beige/60">
+                <div key={`${l.productId}-${l.variantId}-${l.largoId}`} className="flex justify-between text-nb-beige/60">
                   <span>
-                    {p.nombre} × {l.cantidad}
+                    {p.nombre}
+                    {largo ? ` (${largo.cm} cm)` : ""} × {l.cantidad}
                   </span>
-                  <span>{formatARS(p.precio * l.cantidad)}</span>
+                  <span>{formatARS(precio * l.cantidad)}</span>
                 </div>
               );
             })}

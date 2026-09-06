@@ -18,6 +18,7 @@ const CATEGORIES: ProductCategory[] = [
 
 const COLORES_ESTRUCTURA = ["Negro", "Blanco", "Dorado"] as const;
 const TERMINACION = "Satinado";
+const LARGOS_DISPONIBLES = [80, 100, 120] as const;
 
 const TELA_LABELS: Record<TelaTipo, string> = {
   pana: "Pana",
@@ -46,6 +47,11 @@ type FormTela = {
   colores: FormTelaColor[];
 };
 
+type FormLargo = {
+  cm: number;
+  priceDelta: string;
+};
+
 type FormState = {
   nombre: string;
   descripcion: string;
@@ -61,6 +67,8 @@ type FormState = {
   mercadoPagoLink: string;
   variantes: FormVariant[];
   telas: FormTela[];
+  multiplesLargos: boolean;
+  largos: FormLargo[];
   altoCm: string;
   anchoCm: string;
   largoCm: string;
@@ -101,6 +109,10 @@ function fromProduct(p?: Product): FormState {
     altoCm: p ? String(p.logistica.altoCm) : "",
     anchoCm: p ? String(p.logistica.anchoCm) : "",
     largoCm: p ? String(p.logistica.largoCm) : "",
+    multiplesLargos: (p?.largos?.length ?? 0) > 0,
+    largos: p?.largos?.length
+      ? p.largos.map((m) => ({ cm: m.cm, priceDelta: m.priceDelta ? String(m.priceDelta) : "" }))
+      : [],
     pesoKg: p ? String(p.logistica.pesoKg) : "",
     bultos: p ? String(p.logistica.bultos) : "1",
     valorDeclarado: p?.logistica.valorDeclarado ? String(p.logistica.valorDeclarado) : "",
@@ -174,6 +186,20 @@ export default function ProductForm({ initial }: Props) {
     set("variantes", form.variantes.filter((v) => v.id !== id));
   }
 
+  // ---- Largos ----
+  function toggleLargo(cm: number) {
+    const existe = form.largos.some((l) => l.cm === cm);
+    if (existe) {
+      set("largos", form.largos.filter((l) => l.cm !== cm));
+    } else {
+      set("largos", [...form.largos, { cm, priceDelta: "" }].sort((a, b) => a.cm - b.cm));
+    }
+  }
+
+  function updateLargoPrecio(cm: number, priceDelta: string) {
+    set("largos", form.largos.map((l) => (l.cm === cm ? { ...l, priceDelta } : l)));
+  }
+
   // ---- Telas ----
   function toggleTela(tipo: TelaTipo) {
     const existe = form.telas.some((t) => t.tipo === tipo);
@@ -242,6 +268,10 @@ export default function ProductForm({ initial }: Props) {
       setError("Agregá al menos una foto del producto.");
       return;
     }
+    if (form.multiplesLargos && form.largos.length === 0) {
+      setError("Elegí al menos un largo (80, 100 o 120 cm), o desactivá \"Varios largos\".");
+      return;
+    }
 
     const payload = {
       nombre: form.nombre,
@@ -274,11 +304,20 @@ export default function ProductForm({ initial }: Props) {
             .filter((c) => c.nombre.trim())
             .map((c) => ({ id: c.id, nombre: c.nombre, hex: c.hex, imagen: c.imagen })),
         })),
+      largos: form.multiplesLargos
+        ? form.largos.map((l) => ({
+            id: `largo-${l.cm}`,
+            cm: l.cm,
+            priceDelta: l.priceDelta ? Number(l.priceDelta) : undefined,
+          }))
+        : undefined,
       logistica: {
         pesoKg: Number(form.pesoKg || 0),
         altoCm: Number(form.altoCm || 0),
         anchoCm: Number(form.anchoCm || 0),
-        largoCm: Number(form.largoCm || 0),
+        largoCm: form.multiplesLargos
+          ? Math.max(...form.largos.map((l) => l.cm), 0)
+          : Number(form.largoCm || 0),
         bultos: Number(form.bultos || 1),
         valorDeclarado: Number(form.valorDeclarado || form.precio || 0),
         requiereCotizacionManual: form.requiereCotizacionManual,
@@ -450,17 +489,61 @@ export default function ProductForm({ initial }: Props) {
         <p className="text-sm text-nb-beige/70 mb-4">
           En centímetros. El cliente las va a ver en la ficha del producto, y también se usan para calcular el envío.
         </p>
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 gap-5 mb-5">
           <Field label="Alto (cm)">
             <input className="input" type="number" value={form.altoCm} onChange={(e) => set("altoCm", e.target.value)} />
           </Field>
           <Field label="Ancho (cm)">
             <input className="input" type="number" value={form.anchoCm} onChange={(e) => set("anchoCm", e.target.value)} />
           </Field>
-          <Field label="Largo (cm)">
-            <input className="input" type="number" value={form.largoCm} onChange={(e) => set("largoCm", e.target.value)} />
-          </Field>
         </div>
+
+        <div className="mb-3">
+          <Checkbox
+            label="Este producto viene en varios largos"
+            checked={form.multiplesLargos}
+            onChange={(v) => set("multiplesLargos", v)}
+          />
+        </div>
+
+        {!form.multiplesLargos ? (
+          <Field label="Largo (cm)">
+            <input className="input max-w-[200px]" type="number" value={form.largoCm} onChange={(e) => set("largoCm", e.target.value)} />
+          </Field>
+        ) : (
+          <div className="border border-nb-line/60 bg-nb-card p-4">
+            <p className="text-sm text-nb-beige/70 mb-3">
+              Tildá los largos que ofrecés. Si alguno sale más caro, poné la diferencia de precio.
+            </p>
+            <div className="space-y-3">
+              {LARGOS_DISPONIBLES.map((cm) => {
+                const activo = form.largos.find((l) => l.cm === cm);
+                return (
+                  <div key={cm} className="flex items-center gap-4">
+                    <label className="flex items-center gap-2.5 text-sm text-nb-cream w-24">
+                      <input
+                        type="checkbox"
+                        checked={!!activo}
+                        onChange={() => toggleLargo(cm)}
+                        className="w-4 h-4 accent-[#B25B3B]"
+                      />
+                      {cm === 100 ? "1 mt" : cm === 120 ? "1,20 mts" : `${cm} cm`}
+                    </label>
+                    {activo && (
+                      <input
+                        className="input max-w-[180px]"
+                        type="number"
+                        value={activo.priceDelta}
+                        onChange={(e) => updateLargoPrecio(cm, e.target.value)}
+                        placeholder="Precio extra (opcional)"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* PASO 4: COLOR DE ESTRUCTURA */}

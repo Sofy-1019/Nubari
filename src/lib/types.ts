@@ -21,6 +21,12 @@ export interface ProductVariant {
 
 export type TelaTipo = "pana" | "simil-cuero";
 
+export interface ProductLargoOption {
+  id: string;
+  cm: number;
+  priceDelta?: number; // ajuste opcional sobre el precio base
+}
+
 export interface TelaColor {
   id: string;
   nombre: string;
@@ -77,6 +83,7 @@ export interface Product {
   imagenes: string[]; // rutas/URLs, en orden de exhibición
   variantes: ProductVariant[];
   telas?: ProductTela[];
+  largos?: ProductLargoOption[]; // si el producto viene en más de un largo
   logistica: ProductLogistics;
   creadoEn: string;
   actualizadoEn: string;
@@ -85,6 +92,7 @@ export interface Product {
 export interface CartLine {
   productId: string;
   variantId?: string;
+  largoId?: string;
   cantidad: number;
 }
 

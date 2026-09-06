@@ -14,10 +14,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const [activeImg, setActiveImg] = useState(0);
   const [variantId, setVariantId] = useState(product.variantes[0]?.id);
+  const [largoId, setLargoId] = useState(product.largos?.[0]?.id);
   const [cantidad, setCantidad] = useState(1);
 
   const variant = product.variantes.find((v) => v.id === variantId);
-  const precioFinal = product.precio + (variant?.priceDelta ?? 0);
+  const largo = product.largos?.find((m) => m.id === largoId);
+  const precioFinal = product.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0);
   const stockVariante = variant ? variant.stock : product.stock;
   const sinStock = product.agotado || stockVariante <= 0;
 
@@ -26,18 +28,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       buildWhatsAppLink(
         productWhatsAppMessage({
           nombre: product.nombre,
-          variante: [variant?.color, variant?.material]
+          variante: [variant?.color, variant?.material, largo ? `${largo.cm} cm` : null]
             .filter(Boolean)
             .join(" · "),
           precio: precioFinal,
           cantidad,
         })
       ),
-    [product.nombre, variant, precioFinal, cantidad]
+    [product.nombre, variant, largo, precioFinal, cantidad]
   );
 
   function handleAgregar() {
-    addLine({ productId: product.id, variantId, cantidad });
+    addLine({ productId: product.id, variantId, largoId, cantidad });
   }
 
   function handleComprarAhora() {
@@ -112,7 +114,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <div className="mt-6 grid grid-cols-3 gap-4 text-sm text-nb-beige/60 border-y border-nb-line/50 py-4">
             <div>
               <p className="text-nb-beige/35 text-xs mb-1">Medidas</p>
-              {product.logistica.largoCm}×{product.logistica.anchoCm}×{product.logistica.altoCm} cm
+              {largo ? largo.cm : product.logistica.largoCm}×{product.logistica.anchoCm}×{product.logistica.altoCm} cm
             </div>
             <div>
               <p className="text-nb-beige/35 text-xs mb-1">Peso</p>
@@ -149,6 +151,30 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     {[v.color, v.material].filter(Boolean).join(" · ")}
                     {v.priceDelta ? (
                       <span className="text-nb-champagne"> +{formatARS(v.priceDelta)}</span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {product.largos && product.largos.length > 1 && (
+            <div className="mt-6">
+              <p className="text-[11px] tracking-widest3 uppercase text-nb-beige/45 mb-2">Largo</p>
+              <div className="flex flex-wrap gap-2">
+                {product.largos.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setLargoId(m.id)}
+                    className={`px-3.5 py-2 text-sm border transition-colors ${
+                      m.id === largoId
+                        ? "border-nb-champagne bg-nb-champagne/10 text-nb-cream"
+                        : "border-nb-line/60 text-nb-beige/70 hover:border-nb-champagne/50"
+                    }`}
+                  >
+                    {m.cm} cm
+                    {m.priceDelta ? (
+                      <span className="text-nb-champagne"> +{formatARS(m.priceDelta)}</span>
                     ) : null}
                   </button>
                 ))}
