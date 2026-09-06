@@ -25,9 +25,9 @@ export default function Header() {
     <div className="sticky top-0 z-50">
       <TopBar />
       <header className="bg-nb-black/95 backdrop-blur-md border-b border-nb-line/60">
-        <div className="container-nb flex items-center justify-between h-36">
+        <div className="container-nb flex items-center justify-between h-72">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-32 h-32 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-nb-champagne/70 shadow-[0_0_24px_rgba(201,161,90,0.35)]">
+            <div className="relative w-64 h-64 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-nb-champagne/70 shadow-[0_0_24px_rgba(201,161,90,0.35)]">
               <Image
                 src="/images/logo/nubari-logo-circle.png"
                 alt="Nubari"
@@ -37,14 +37,6 @@ export default function Header() {
                 quality={100}
               />
             </div>
-            <span className="hidden sm:block leading-none">
-              <span className="font-serif text-xl tracking-wide text-nb-cream block">
-                NUBARI
-              </span>
-              <span className="block text-[10px] tracking-widest2 text-nb-champagne mt-0.5">
-                DECO
-              </span>
-            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8">
