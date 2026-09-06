@@ -236,6 +236,19 @@ export default function ProductForm({ initial }: Props) {
     <form onSubmit={handleSubmit} className="space-y-10 max-w-2xl">
       {/* PASO 1: FOTOS — primero, como en Mercado Libre */}
       <section>
+        <div className="bg-red-950/40 border-2 border-red-500 p-4 mb-6">
+          <p className="text-red-300 text-sm font-bold mb-2">
+            🔧 CUADRO DE PRUEBA (temporal, para encontrar el problema)
+          </p>
+          <input
+            type="file"
+            onChange={(e) => {
+              window.alert(
+                "¡FUNCIONÓ! Se detectó el archivo: " + (e.target.files?.[0]?.name || "ninguno")
+              );
+            }}
+          />
+        </div>
         <div className="flex items-center gap-2 mb-2">
           <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
           <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Fotos del producto</h2>
