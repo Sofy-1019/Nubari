@@ -66,11 +66,19 @@ export async function readAll<T>(name: string): Promise<T[]> {
 
 export async function writeAll<T>(name: string, data: T[]): Promise<void> {
   if (hasBlob()) {
-    await put(`${BLOB_PREFIX}${name}.json`, JSON.stringify(data, null, 2), {
-      access: "public",
-      addRandomSuffix: false,
-      contentType: "application/json",
-    });
+    try {
+      await put(`${BLOB_PREFIX}${name}.json`, JSON.stringify(data, null, 2), {
+        access: "public",
+        addRandomSuffix: false,
+        contentType: "application/json",
+      });
+    } catch (err) {
+      throw new Error(
+        `No se pudo guardar en el almacenamiento de datos (Vercel Blob): ${
+          (err as Error).message
+        }`
+      );
+    }
     return;
   }
   writeLocal(name, data);

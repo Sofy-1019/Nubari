@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+
 import { readAll, readOne, upsert, remove } from "./jsonStore";
 import type { Product, ProductCategory } from "../types";
 
@@ -86,7 +86,7 @@ export async function createProduct(
   const now = new Date().toISOString();
   const product: Product = {
     ...data,
-    id: nanoid(10),
+    id: crypto.randomUUID().slice(0, 10),
     creadoEn: now,
     actualizadoEn: now,
   };

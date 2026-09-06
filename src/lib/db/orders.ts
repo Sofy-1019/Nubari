@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+
 import { readAll, readOne, upsert } from "./jsonStore";
 import type { Order, OrderStatus } from "../types";
 
@@ -20,7 +20,7 @@ export async function createOrder(
   const numero = `NB-${String(orders.length + 1001)}`;
   const order: Order = {
     ...data,
-    id: nanoid(12),
+    id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
     numero,
     creadoEn: new Date().toISOString(),
   };
