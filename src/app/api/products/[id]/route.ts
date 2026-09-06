@@ -8,10 +8,17 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const body = await req.json();
-  const updated = await updateProduct(params.id, body);
-  if (!updated) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
-  return NextResponse.json(updated);
+  try {
+    const body = await req.json();
+    const updated = await updateProduct(params.id, body);
+    if (!updated) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    return NextResponse.json(updated);
+  } catch (err) {
+    return NextResponse.json(
+      { error: "No se pudo guardar el producto", detail: (err as Error).message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
