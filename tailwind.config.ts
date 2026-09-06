@@ -6,17 +6,20 @@ const config: Config = {
     extend: {
       colors: {
         nb: {
-          black: "#0b0a09",
-          carbon: "#171412",
-          ink: "#211d1a",
-          card: "#1c1815",
-          line: "#332e28",
-          cream: "#f7f2ea",
-          beige: "#e9e0d1",
-          taupe: "#a89a86",
-          champagne: "#d9b98a",
-          gold: "#c9a15a",
-          roseGold: "#c99a82",
+          // Fondos (antes tonos oscuros — ahora tonos crema/claros)
+          black: "#FDFBF7",
+          carbon: "#F4EBDD",
+          ink: "#EEE2CE",
+          card: "#FFFFFF",
+          line: "#E6D9C2",
+          // Textos (antes tonos claros — ahora tonos oscuros)
+          cream: "#3B3128",
+          beige: "#5B4E3F",
+          taupe: "#8C7A63",
+          // Acentos bronce/terracota, a tono con el logo nuevo
+          champagne: "#B25B3B",
+          gold: "#9C4A2E",
+          roseGold: "#A9714F",
         },
       },
       fontFamily: {

@@ -4,15 +4,15 @@ import { Instagram, Facebook } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-nb-black text-nb-beige/80 mt-32 border-t border-nb-line/60">
+    <footer className="bg-nb-carbon text-nb-beige mt-32 border-t border-nb-line/70">
       <div className="container-nb py-16 grid grid-cols-2 md:grid-cols-5 gap-10">
         <div className="col-span-2">
-          <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3 ring-1 ring-nb-champagne/40">
-            <Image src="/images/logo/nubari-logo-circle.png" alt="Nubari" fill className="object-cover" />
+          <div className="relative w-16 h-16 rounded-full overflow-hidden mb-3 ring-1 ring-nb-champagne/50">
+            <Image src="/images/logo/nubari-logo-new.png" alt="Nubari Deco" fill className="object-cover" />
           </div>
           <p className="font-serif text-2xl text-nb-cream">NUBARI</p>
           <p className="text-[10px] tracking-widest2 text-nb-champagne mt-1">DECO</p>
-          <p className="text-sm text-nb-beige/60 mt-4 max-w-xs">
+          <p className="text-sm text-nb-beige/80 mt-4 max-w-xs">
             Diseño · Estilo · Hogar. Muebles y accesorios pensados para acompañar cada espacio.
           </p>
         </div>
@@ -28,7 +28,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <p className="text-xs tracking-widest3 uppercase text-nb-champagne mb-4">Productos</p>
+          <p className="text-xs tracking-widest3 uppercase text-nb-champagne mb-4">Categorías</p>
           <ul className="space-y-2 text-sm">
             <li><Link href="/productos?categoria=banquetas" className="hover:text-nb-champagne transition-colors">Bancos y Banquetas</Link></li>
             <li><Link href="/productos?categoria=organizacion" className="hover:text-nb-champagne transition-colors">Organizadores</Link></li>
@@ -44,13 +44,13 @@ export default function Footer() {
             <li>Berazategui, Buenos Aires</li>
           </ul>
           <div className="flex gap-3 mt-4">
-            <a href="#" aria-label="Instagram" className="text-nb-beige/70 hover:text-nb-champagne transition-colors"><Instagram size={16} /></a>
-            <a href="#" aria-label="Facebook" className="text-nb-beige/70 hover:text-nb-champagne transition-colors"><Facebook size={16} /></a>
+            <a href="#" aria-label="Instagram" className="text-nb-beige hover:text-nb-champagne transition-colors"><Instagram size={16} /></a>
+            <a href="#" aria-label="Facebook" className="text-nb-beige hover:text-nb-champagne transition-colors"><Facebook size={16} /></a>
           </div>
         </div>
       </div>
-      <div className="border-t border-nb-line/60">
-        <div className="container-nb py-6 text-[11px] text-nb-beige/40 flex flex-col sm:flex-row justify-between gap-2">
+      <div className="border-t border-nb-line/70">
+        <div className="container-nb py-6 text-[11px] text-nb-beige/60 flex flex-col sm:flex-row justify-between gap-2">
           <span>© {new Date().getFullYear()} Nubari Deco. Todos los derechos reservados.</span>
           <span>Envíos con Andreani &amp; Vía Cargo · Pagos protegidos</span>
         </div>

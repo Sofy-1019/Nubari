@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 const CATEGORIES: ProductCategory[] = [
   "banquetas",
@@ -118,14 +119,10 @@ export default function ProductForm({ initial }: Props) {
     setUploading(true);
     setError(null);
     try {
-      const { upload } = await import("@vercel/blob/client");
       const urls: string[] = [];
       for (const file of files) {
-        const blob = await upload(`productos/${Date.now()}-${file.name}`, file, {
-          access: "public",
-          handleUploadUrl: "/api/upload",
-        });
-        urls.push(blob.url);
+        const url = await uploadImageToCloudinary(file);
+        urls.push(url);
       }
       set("imagenes", [...form.imagenes, ...urls]);
       window.alert(`¡Listo! Se subieron ${urls.length} foto(s) correctamente.`);
@@ -505,17 +502,17 @@ export default function ProductForm({ initial }: Props) {
         .input {
           width: 100%;
           padding: 0.7rem 0.85rem;
-          border: 1px solid #332e28;
-          background: rgba(11, 10, 9, 0.5);
-          color: #f7f2ea;
+          border: 1px solid #E6D9C2;
+          background: #FFFFFF;
+          color: #3B3128;
           font-size: 0.95rem;
         }
         .input::placeholder {
-          color: rgba(233, 224, 209, 0.35);
+          color: rgba(91, 78, 63, 0.45);
         }
         .input:focus {
           outline: none;
-          border-color: #c9a15a;
+          border-color: #B25B3B;
         }
       `}</style>
     </form>
@@ -534,7 +531,7 @@ function Field({ label, children, span2 }: { label: string; children: React.Reac
 function Checkbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-center gap-2.5 text-sm text-nb-beige/85">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 accent-[#c9a15a]" />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 accent-[#B25B3B]" />
       {label}
     </label>
   );

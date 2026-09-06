@@ -24,18 +24,22 @@ export default function Header() {
   return (
     <div className="sticky top-0 z-50">
       <TopBar />
-      <header className="bg-nb-black/95 backdrop-blur-md border-b border-nb-line/60">
-        <div className="container-nb flex items-center justify-between h-72">
+      <header className="bg-nb-black/95 backdrop-blur-md border-b border-nb-line/70">
+        <div className="container-nb flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-64 h-64 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-nb-champagne/70 shadow-[0_0_24px_rgba(201,161,90,0.35)]">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-nb-champagne/60">
               <Image
-                src="/images/logo/nubari-logo-circle.png"
-                alt="Nubari"
+                src="/images/logo/nubari-logo-new.png"
+                alt="Nubari Deco"
                 fill
                 className="object-cover"
                 priority
                 quality={100}
               />
+            </div>
+            <div className="leading-none hidden xs:block">
+              <p className="font-serif text-lg tracking-wide text-nb-cream">NUBARI</p>
+              <p className="text-[9px] tracking-widest2 text-nb-champagne">DECO</p>
             </div>
           </Link>
 
@@ -44,7 +48,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs tracking-widest3 uppercase text-nb-beige/85 hover:text-nb-champagne transition-colors duration-200 focus-ring"
+                className="text-xs tracking-widest3 uppercase text-nb-beige hover:text-nb-champagne transition-colors duration-200 focus-ring"
               >
                 {link.label}
               </Link>
@@ -54,21 +58,21 @@ export default function Header() {
           <div className="flex items-center gap-5">
             <button
               aria-label="Buscar"
-              className="hidden sm:inline-flex text-nb-beige/85 hover:text-nb-champagne transition-colors focus-ring"
+              className="hidden sm:inline-flex text-nb-beige hover:text-nb-champagne transition-colors focus-ring"
             >
               <Search size={18} strokeWidth={1.5} />
             </button>
             <Link
               href="/admin"
               aria-label="Cuenta"
-              className="hidden sm:inline-flex text-nb-beige/85 hover:text-nb-champagne transition-colors focus-ring"
+              className="hidden sm:inline-flex text-nb-beige hover:text-nb-champagne transition-colors focus-ring"
             >
               <User size={18} strokeWidth={1.5} />
             </Link>
             <Link
               href="/carrito"
               aria-label="Carrito"
-              className="relative inline-flex text-nb-beige/85 hover:text-nb-champagne transition-colors focus-ring"
+              className="relative inline-flex text-nb-beige hover:text-nb-champagne transition-colors focus-ring"
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
               {cartCount > 0 && (
@@ -79,7 +83,7 @@ export default function Header() {
             </Link>
             <button
               aria-label="Menú"
-              className="lg:hidden text-nb-beige/85 focus-ring"
+              className="lg:hidden text-nb-beige focus-ring"
               onClick={() => setOpen((v) => !v)}
             >
               {open ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
@@ -88,14 +92,14 @@ export default function Header() {
         </div>
 
         {open && (
-          <nav className="lg:hidden border-t border-nb-line/60 bg-nb-black">
+          <nav className="lg:hidden border-t border-nb-line/70 bg-nb-black">
             <div className="container-nb flex flex-col py-4">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="py-3 text-sm tracking-wide text-nb-beige/90 border-b border-nb-line/40 last:border-none"
+                  className="py-3 text-sm tracking-wide text-nb-cream border-b border-nb-line/50 last:border-none"
                 >
                   {link.label}
                 </Link>

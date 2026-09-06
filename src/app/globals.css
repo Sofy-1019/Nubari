@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #0b0a09;
-  color: #f7f2ea;
+  background-color: #FDFBF7;
+  color: #3B3128;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -26,15 +26,15 @@ body {
 }
 
 ::selection {
-  background-color: #c9a15a;
-  color: #0b0a09;
+  background-color: #B25B3B;
+  color: #FDFBF7;
 }
 
 .focus-ring {
   outline-offset: 3px;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid #c9a15a;
+  outline: 2px solid #B25B3B;
   outline-offset: 3px;
 }
 
