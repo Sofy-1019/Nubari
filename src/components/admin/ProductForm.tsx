@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Loader2, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory } from "@/lib/types";
 
 const CATEGORIES: ProductCategory[] = [
@@ -98,6 +98,7 @@ export default function ProductForm({ initial }: Props) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showLogistica, setShowLogistica] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -226,65 +227,15 @@ export default function ProductForm({ initial }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-10 max-w-2xl">
+      {/* PASO 1: FOTOS — primero, como en Mercado Libre */}
       <section>
-        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-5">Datos generales</h2>
-        <div className="grid sm:grid-cols-2 gap-5">
-          <Field label="Nombre" span2>
-            <input className="input" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
-          </Field>
-          <Field label="Descripción" span2>
-            <textarea className="input" rows={3} value={form.descripcion} onChange={(e) => set("descripcion", e.target.value)} />
-          </Field>
-          <Field label="Categoría">
-            <select className="input" value={form.categoria} onChange={(e) => set("categoria", e.target.value as ProductCategory)}>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="SKU">
-            <input className="input" value={form.sku} onChange={(e) => set("sku", e.target.value)} placeholder="Se genera automáticamente si se deja vacío" />
-          </Field>
-          <Field label="Precio">
-            <input className="input" type="number" value={form.precio} onChange={(e) => set("precio", e.target.value)} />
-          </Field>
-          <Field label="Precio anterior (opcional)">
-            <input className="input" type="number" value={form.precioAnterior} onChange={(e) => set("precioAnterior", e.target.value)} />
-          </Field>
-          <Field label="Costo (opcional)">
-            <input className="input" type="number" value={form.costo} onChange={(e) => set("costo", e.target.value)} />
-          </Field>
-          <Field label="Stock total (uso interno, el cliente no lo ve)">
-            <input className="input" type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} />
-          </Field>
-          <Field label="Demora de fabricación (días hábiles)">
-            <input className="input" type="number" min="0" value={form.diasFabricacion} onChange={(e) => set("diasFabricacion", e.target.value)} placeholder="Ej: 7" />
-          </Field>
-          <Field label="Link de pago con tarjeta (Mercado Pago)" span2>
-            <input
-              className="input"
-              value={form.mercadoPagoLink}
-              onChange={(e) => set("mercadoPagoLink", e.target.value)}
-              placeholder="https://mpago.la/..."
-            />
-            <p className="text-sm text-nb-beige/45 mt-1.5">
-              Se genera desde tu cuenta de Mercado Pago: "Cobrar" → "Crear link de pago", con
-              el monto de este producto. Si lo cargás acá, en la ficha va a aparecer un botón
-              de "6 cuotas sin interés" que lleva directo a ese link. Si lo dejás vacío, ese
-              botón no se muestra.
-            </p>
-          </Field>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Fotos del producto</h2>
         </div>
-        <div className="flex flex-wrap gap-6 mt-5">
-          <Checkbox label="Destacado" checked={form.destacado} onChange={(v) => set("destacado", v)} />
-          <Checkbox label="Nuevo" checked={form.nuevo} onChange={(v) => set("nuevo", v)} />
-          <Checkbox label="Agotado" checked={form.agotado} onChange={(v) => set("agotado", v)} />
-          <Checkbox label="Activo" checked={form.activo} onChange={(v) => set("activo", v)} />
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-2">Fotos del producto</h2>
+        <p className="text-sm text-nb-beige/55 mb-4">
+          Sacale varias fotos con buena luz. La primera es la que ve el cliente en el catálogo.
+        </p>
         <div className="flex flex-wrap gap-3 mb-3">
           {form.imagenes.map((img, i) => (
             <div key={img + i} className="relative w-24 h-24 border border-nb-line/60 overflow-hidden group">
@@ -306,10 +257,7 @@ export default function ProductForm({ initial }: Props) {
           ))}
           <button
             type="button"
-            onClick={() => {
-              console.log("[Nubari] Click en botón Agregar foto");
-              fileInputRef.current?.click();
-            }}
+            onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="w-24 h-24 border border-dashed border-nb-champagne/40 flex flex-col items-center justify-center gap-1 text-nb-champagne text-xs cursor-pointer hover:border-nb-champagne hover:bg-nb-champagne/10 transition-colors disabled:opacity-50"
           >
@@ -324,26 +272,88 @@ export default function ProductForm({ initial }: Props) {
             className="hidden"
             disabled={uploading}
             onChange={(e) => {
-              console.log("[Nubari] onChange del input file disparado");
               handleFilesSelected(e.target.files);
               e.target.value = "";
             }}
           />
         </div>
-        <p className="text-sm text-nb-beige/55">
-          La primera foto es la que se muestra en el catálogo. Podés subir varias y sacarlas
-          pasando el mouse por encima y tocando la papelera.
-        </p>
       </section>
 
+      {/* PASO 2: LO BÁSICO */}
       <section>
-        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-2">
-          Variantes (color / material)
-        </h2>
+        <div className="flex items-center gap-2 mb-5">
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">¿Qué estás publicando?</h2>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-5">
+          <Field label="Nombre del producto" span2>
+            <input className="input" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} placeholder="Ej: Banqueta Nubari Tapizada" />
+          </Field>
+          <Field label="Descripción" span2>
+            <textarea className="input" rows={3} value={form.descripcion} onChange={(e) => set("descripcion", e.target.value)} placeholder="Contale al cliente de qué está hecho, para qué sirve, medidas destacadas..." />
+          </Field>
+          <Field label="Categoría">
+            <select className="input" value={form.categoria} onChange={(e) => set("categoria", e.target.value as ProductCategory)}>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="SKU (código interno, opcional)">
+            <input className="input" value={form.sku} onChange={(e) => set("sku", e.target.value)} placeholder="Se genera solo si lo dejás vacío" />
+          </Field>
+        </div>
+      </section>
+
+      {/* PASO 3: PRECIO Y STOCK */}
+      <section>
+        <div className="flex items-center gap-2 mb-5">
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Precio y stock</h2>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-5">
+          <Field label="Precio de venta">
+            <input className="input" type="number" value={form.precio} onChange={(e) => set("precio", e.target.value)} placeholder="$" />
+          </Field>
+          <Field label="Precio anterior (para mostrar descuento, opcional)">
+            <input className="input" type="number" value={form.precioAnterior} onChange={(e) => set("precioAnterior", e.target.value)} />
+          </Field>
+          <Field label="Costo — lo que te sale a vos (opcional, no lo ve el cliente)">
+            <input className="input" type="number" value={form.costo} onChange={(e) => set("costo", e.target.value)} />
+          </Field>
+          <Field label="Stock disponible">
+            <input className="input" type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} />
+          </Field>
+          <Field label="Demora de fabricación en días hábiles (opcional)">
+            <input className="input" type="number" min="0" value={form.diasFabricacion} onChange={(e) => set("diasFabricacion", e.target.value)} placeholder="Ej: 7" />
+          </Field>
+          <Field label="Link de pago con tarjeta — Mercado Pago (opcional)">
+            <input
+              className="input"
+              value={form.mercadoPagoLink}
+              onChange={(e) => set("mercadoPagoLink", e.target.value)}
+              placeholder="https://mpago.la/..."
+            />
+          </Field>
+        </div>
+        <div className="flex flex-wrap gap-6 mt-5">
+          <Checkbox label="Destacado" checked={form.destacado} onChange={(v) => set("destacado", v)} />
+          <Checkbox label="Nuevo" checked={form.nuevo} onChange={(v) => set("nuevo", v)} />
+          <Checkbox label="Agotado" checked={form.agotado} onChange={(v) => set("agotado", v)} />
+          <Checkbox label="Activo (visible en la tienda)" checked={form.activo} onChange={(v) => set("activo", v)} />
+        </div>
+      </section>
+
+      {/* PASO 4: VARIANTES */}
+      <section>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne">Colores / variantes (opcional)</h2>
+        </div>
         <p className="text-sm text-nb-beige/55 mb-5">
-          Agregá una fila por cada opción que el cliente pueda elegir. Si una opción cuesta
-          más (por ejemplo, un color con pintura especial), cargá esa diferencia en
-          "Precio extra" — se suma automáticamente al precio base cuando el cliente la elige.
+          Si el producto viene en más de un color o material, agregá una fila por cada opción.
+          Si alguna sale más cara (ej. un color con pintura especial), poné la diferencia en
+          "Precio extra" — se suma sola al precio base cuando el cliente la elige.
         </p>
         <div className="space-y-4">
           {form.variantes.map((v) => (
@@ -386,35 +396,59 @@ export default function ProductForm({ initial }: Props) {
         </button>
       </section>
 
+      {/* PASO 5: ENVÍO — escondido por defecto, como los "detalles avanzados" de ML */}
       <section>
-        <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne mb-5">Datos logísticos</h2>
-        <div className="grid sm:grid-cols-3 gap-5">
-          <Field label="Peso (kg)">
-            <input className="input" type="number" step="0.1" value={form.pesoKg} onChange={(e) => set("pesoKg", e.target.value)} />
-          </Field>
-          <Field label="Alto (cm)">
-            <input className="input" type="number" value={form.altoCm} onChange={(e) => set("altoCm", e.target.value)} />
-          </Field>
-          <Field label="Ancho (cm)">
-            <input className="input" type="number" value={form.anchoCm} onChange={(e) => set("anchoCm", e.target.value)} />
-          </Field>
-          <Field label="Largo (cm)">
-            <input className="input" type="number" value={form.largoCm} onChange={(e) => set("largoCm", e.target.value)} />
-          </Field>
-          <Field label="Cantidad de bultos">
-            <input className="input" type="number" value={form.bultos} onChange={(e) => set("bultos", e.target.value)} />
-          </Field>
-          <Field label="Valor declarado">
-            <input className="input" type="number" value={form.valorDeclarado} onChange={(e) => set("valorDeclarado", e.target.value)} placeholder="Por defecto, el precio" />
-          </Field>
-        </div>
-        <div className="mt-5">
-          <Checkbox
-            label="Requiere cotización manual (producto muy grande)"
-            checked={form.requiereCotizacionManual}
-            onChange={(v) => set("requiereCotizacionManual", v)}
+        <button
+          type="button"
+          onClick={() => setShowLogistica((v) => !v)}
+          className="flex items-center gap-2 w-full text-left"
+        >
+          <span className="w-6 h-6 rounded-full bg-nb-champagne text-nb-black text-xs font-bold flex items-center justify-center flex-shrink-0">5</span>
+          <h2 className="text-sm tracking-widest3 uppercase text-nb-champagne flex-1">
+            Datos para calcular el envío
+          </h2>
+          <ChevronDown
+            size={18}
+            className={`text-nb-champagne transition-transform ${showLogistica ? "rotate-180" : ""}`}
           />
-        </div>
+        </button>
+        {!showLogistica && (
+          <p className="text-sm text-nb-beige/45 mt-2 ml-8">
+            Peso, medidas y bultos — tocá para completarlo (recomendado para que el cotizador
+            de envío funcione bien).
+          </p>
+        )}
+        {showLogistica && (
+          <div className="mt-5 ml-8">
+            <div className="grid sm:grid-cols-3 gap-5">
+              <Field label="Peso (kg)">
+                <input className="input" type="number" step="0.1" value={form.pesoKg} onChange={(e) => set("pesoKg", e.target.value)} />
+              </Field>
+              <Field label="Alto (cm)">
+                <input className="input" type="number" value={form.altoCm} onChange={(e) => set("altoCm", e.target.value)} />
+              </Field>
+              <Field label="Ancho (cm)">
+                <input className="input" type="number" value={form.anchoCm} onChange={(e) => set("anchoCm", e.target.value)} />
+              </Field>
+              <Field label="Largo (cm)">
+                <input className="input" type="number" value={form.largoCm} onChange={(e) => set("largoCm", e.target.value)} />
+              </Field>
+              <Field label="Cantidad de bultos">
+                <input className="input" type="number" value={form.bultos} onChange={(e) => set("bultos", e.target.value)} />
+              </Field>
+              <Field label="Valor declarado">
+                <input className="input" type="number" value={form.valorDeclarado} onChange={(e) => set("valorDeclarado", e.target.value)} placeholder="Por defecto, el precio" />
+              </Field>
+            </div>
+            <div className="mt-5">
+              <Checkbox
+                label="Requiere cotización manual (producto muy grande)"
+                checked={form.requiereCotizacionManual}
+                onChange={(v) => set("requiereCotizacionManual", v)}
+              />
+            </div>
+          </div>
+        )}
       </section>
 
       {error && <p className="text-sm text-red-400">{error}</p>}
@@ -424,7 +458,7 @@ export default function ProductForm({ initial }: Props) {
         disabled={saving}
         className="px-7 py-3.5 bg-nb-champagne text-nb-black text-sm font-medium hover:bg-nb-gold transition-colors disabled:opacity-50"
       >
-        {saving ? "Guardando…" : initial ? "Guardar cambios" : "Crear producto"}
+        {saving ? "Guardando…" : initial ? "Guardar cambios" : "Publicar producto"}
       </button>
 
       <style jsx global>{`
