@@ -6,6 +6,7 @@ import DeleteProductButton from "./DeleteProductButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function AdminProductosPage() {
   let products: Awaited<ReturnType<typeof getAllProductsStrict>> = [];

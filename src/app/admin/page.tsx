@@ -3,6 +3,10 @@ import { getAllProducts } from "@/lib/db/products";
 import { getAllOrders } from "@/lib/db/orders";
 import { formatARS } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export default async function AdminDashboard() {
   const products = await getAllProducts();
   const orders = await getAllOrders();
