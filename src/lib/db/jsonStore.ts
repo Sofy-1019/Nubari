@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { put, list } from "@vercel/blob";
+import { put, list, get } from "@vercel/blob";
 
 // ==========================================================================
 // Almacenamiento de datos.
@@ -50,9 +50,9 @@ export async function readAll<T>(name: string): Promise<T[]> {
     try {
       const { blobs } = await list({ prefix: `${BLOB_PREFIX}${name}.json`, limit: 1 });
       if (blobs.length > 0) {
-        const res = await fetch(blobs[0].url, { cache: "no-store" });
-        if (res.ok) {
-          const text = await res.text();
+        const resultado = await get(blobs[0].pathname, { access: "private" });
+        if (resultado?.stream) {
+          const text = await new Response(resultado.stream).text();
           if (text.trim()) return JSON.parse(text) as T[];
         }
       }
@@ -68,7 +68,7 @@ export async function writeAll<T>(name: string, data: T[]): Promise<void> {
   if (hasBlob()) {
     try {
       await put(`${BLOB_PREFIX}${name}.json`, JSON.stringify(data, null, 2), {
-        access: "public",
+        access: "private",
         addRandomSuffix: false,
         contentType: "application/json",
       });
