@@ -172,7 +172,7 @@ export default function CheckoutPage() {
               const largo = p.largos?.find((m) => m.id === l.largoId);
               const precio = p.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0);
               return (
-                <div key={`${l.productId}-${l.variantId}-${l.largoId}`} className="flex justify-between text-nb-beige/60">
+                <div key={`${l.productId}-${l.variantId}-${l.largoId}-${l.telaColorId}`} className="flex justify-between text-nb-beige/60">
                   <span>
                     {p.nombre}
                     {largo ? ` (${largo.cm} cm)` : ""} × {l.cantidad}

@@ -15,8 +15,8 @@ const STORAGE_KEY = "nubari_cart_v1";
 interface CartContextValue {
   lines: CartLine[];
   addLine: (line: CartLine) => void;
-  updateQuantity: (productId: string, variantId: string | undefined, largoId: string | undefined, cantidad: number) => void;
-  removeLine: (productId: string, variantId?: string, largoId?: string) => void;
+  updateQuantity: (productId: string, variantId: string | undefined, largoId: string | undefined, telaColorId: string | undefined, cantidad: number) => void;
+  removeLine: (productId: string, variantId?: string, largoId?: string, telaColorId?: string) => void;
   clearCart: () => void;
   selectedShipping: ShippingQuoteOption | null;
   setSelectedShipping: (opt: ShippingQuoteOption | null) => void;
@@ -80,7 +80,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         (l) =>
           l.productId === line.productId &&
           l.variantId === line.variantId &&
-          l.largoId === line.largoId
+          l.largoId === line.largoId &&
+          l.telaColorId === line.telaColorId
       );
       if (idx >= 0) {
         const next = [...prev];
@@ -92,28 +93,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateQuantity = useCallback(
-    (productId: string, variantId: string | undefined, largoId: string | undefined, cantidad: number) => {
+    (
+      productId: string,
+      variantId: string | undefined,
+      largoId: string | undefined,
+      telaColorId: string | undefined,
+      cantidad: number
+    ) => {
       setSelectedShipping(null);
       setLines((prev) =>
-        prev
-          .map((l) =>
-            l.productId === productId && l.variantId === variantId && l.largoId === largoId
-              ? { ...l, cantidad: Math.max(1, cantidad) }
-              : l
-          )
+        prev.map((l) =>
+          l.productId === productId &&
+          l.variantId === variantId &&
+          l.largoId === largoId &&
+          l.telaColorId === telaColorId
+            ? { ...l, cantidad: Math.max(1, cantidad) }
+            : l
+        )
       );
     },
     []
   );
 
-  const removeLine = useCallback((productId: string, variantId?: string, largoId?: string) => {
-    setSelectedShipping(null);
-    setLines((prev) =>
-      prev.filter(
-        (l) => !(l.productId === productId && l.variantId === variantId && l.largoId === largoId)
-      )
-    );
-  }, []);
+  const removeLine = useCallback(
+    (productId: string, variantId?: string, largoId?: string, telaColorId?: string) => {
+      setSelectedShipping(null);
+      setLines((prev) =>
+        prev.filter(
+          (l) =>
+            !(
+              l.productId === productId &&
+              l.variantId === variantId &&
+              l.largoId === largoId &&
+              l.telaColorId === telaColorId
+            )
+        )
+      );
+    },
+    []
+  );
 
   const clearCart = useCallback(() => {
     setLines([]);

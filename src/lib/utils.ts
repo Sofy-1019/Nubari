@@ -24,6 +24,11 @@ export const CATEGORY_LABELS: Record<string, string> = {
   novedades: "Novedades",
 };
 
+export const TELA_LABELS: Record<"pana" | "simil-cuero", string> = {
+  pana: "Pana",
+  "simil-cuero": "Símil cuero",
+};
+
 export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5491100000000";
 
 export function buildWhatsAppLink(message: string): string {

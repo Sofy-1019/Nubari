@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createOrder, getAllOrders } from "@/lib/db/orders";
 import { getProductById } from "@/lib/db/products";
 import type { CartLine, Destino, ShippingQuoteOption } from "@/lib/types";
+import { TELA_LABELS } from "@/lib/utils";
 
 export async function GET() {
   return NextResponse.json(await getAllOrders());
@@ -41,13 +42,21 @@ export async function POST(req: NextRequest) {
         if (!product) return null;
         const variant = product.variantes.find((v) => v.id === line.variantId);
         const largo = product.largos?.find((m) => m.id === line.largoId);
+        const tela = product.telas?.find((t) => t.tipo === line.telaTipo);
+        const colorTela = tela?.colores.find((c) => c.id === line.telaColorId);
         return {
           productId: product.id,
           productName: product.nombre,
           variantId: variant?.id,
-          variantLabel: [variant?.color, variant?.material, largo ? `${largo.cm} cm` : null]
-            .filter(Boolean)
-            .join(" · ") || undefined,
+          variantLabel:
+            [
+              variant?.color,
+              variant?.material,
+              largo ? `${largo.cm} cm` : null,
+              colorTela ? `${TELA_LABELS[line.telaTipo!]} ${colorTela.nombre}` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ") || undefined,
           cantidad: line.cantidad,
           precioUnitario: product.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0),
           imagen: product.imagenes[0],

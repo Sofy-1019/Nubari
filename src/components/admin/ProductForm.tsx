@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ChevronDown, Loader2, Plus, Trash2, Upload } from "lucide-react";
 import type { Product, ProductCategory, TelaTipo } from "@/lib/types";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { TELA_LABELS } from "@/lib/utils";
 
 const CATEGORIES: ProductCategory[] = [
   "banquetas",
@@ -39,11 +40,6 @@ const CATALOGO_PANA: { nombre: string; hex: string }[] = [
   { nombre: "16", hex: "#8B8983" },
   { nombre: "17", hex: "#201C1A" },
 ];
-
-const TELA_LABELS: Record<TelaTipo, string> = {
-  pana: "Pana",
-  "simil-cuero": "Símil cuero",
-};
 
 interface Props {
   initial?: Product;

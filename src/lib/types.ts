@@ -94,6 +94,8 @@ export interface CartLine {
   productId: string;
   variantId?: string;
   largoId?: string;
+  telaTipo?: TelaTipo;
+  telaColorId?: string;
   cantidad: number;
 }
 

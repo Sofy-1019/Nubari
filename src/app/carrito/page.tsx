@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/cartContext";
 import type { Product } from "@/lib/types";
-import { formatARS } from "@/lib/utils";
+import { formatARS, TELA_LABELS } from "@/lib/utils";
 import ShippingCalculator from "@/components/ShippingCalculator";
 
 export default function CarritoPage() {
@@ -73,10 +73,12 @@ export default function CarritoPage() {
               if (!p) return null;
               const variant = p.variantes.find((v) => v.id === line.variantId);
               const largo = p.largos?.find((m) => m.id === line.largoId);
+              const tela = p.telas?.find((t) => t.tipo === line.telaTipo);
+              const colorTela = tela?.colores.find((c) => c.id === line.telaColorId);
               const precio = p.precio + (variant?.priceDelta ?? 0) + (largo?.priceDelta ?? 0);
               return (
                 <div
-                  key={`${line.productId}-${line.variantId}-${line.largoId}`}
+                  key={`${line.productId}-${line.variantId}-${line.largoId}-${line.telaColorId}`}
                   className="flex gap-4 border-b border-nb-line/50 pb-6"
                 >
                   <div className="relative w-24 h-28 bg-nb-card border border-nb-line/50 flex-shrink-0 overflow-hidden">
@@ -86,9 +88,14 @@ export default function CarritoPage() {
                     <Link href={`/productos/${p.slug}`} className="font-serif text-lg text-nb-cream hover:text-nb-champagne">
                       {p.nombre}
                     </Link>
-                    {(variant || largo) && (
+                    {(variant || largo || colorTela) && (
                       <p className="text-sm text-nb-beige/50 mt-0.5">
-                        {[variant?.color, variant?.material, largo ? `${largo.cm} cm` : null]
+                        {[
+                          variant?.color,
+                          variant?.material,
+                          largo ? `${largo.cm} cm` : null,
+                          colorTela ? `${TELA_LABELS[line.telaTipo!]} ${colorTela.nombre}` : null,
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
@@ -98,21 +105,21 @@ export default function CarritoPage() {
                     <div className="mt-3 flex items-center gap-4">
                       <div className="flex items-center border border-nb-line/60">
                         <button
-                          onClick={() => updateQuantity(line.productId, line.variantId, line.largoId, line.cantidad - 1)}
+                          onClick={() => updateQuantity(line.productId, line.variantId, line.largoId, line.telaColorId, line.cantidad - 1)}
                           className="p-2 hover:bg-nb-black/40 transition-colors text-nb-beige"
                         >
                           <Minus size={13} />
                         </button>
                         <span className="w-8 text-center text-sm text-nb-cream">{line.cantidad}</span>
                         <button
-                          onClick={() => updateQuantity(line.productId, line.variantId, line.largoId, line.cantidad + 1)}
+                          onClick={() => updateQuantity(line.productId, line.variantId, line.largoId, line.telaColorId, line.cantidad + 1)}
                           className="p-2 hover:bg-nb-black/40 transition-colors text-nb-beige"
                         >
                           <Plus size={13} />
                         </button>
                       </div>
                       <button
-                        onClick={() => removeLine(line.productId, line.variantId, line.largoId)}
+                        onClick={() => removeLine(line.productId, line.variantId, line.largoId, line.telaColorId)}
                         className="text-nb-beige/40 hover:text-red-400 transition-colors"
                         aria-label="Eliminar"
                       >
