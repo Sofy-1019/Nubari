@@ -1,11 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getAllProducts } from "@/lib/db/products";
+import { getAllProductsStrict } from "@/lib/db/products";
 import { formatARS } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminProductosPage() {
-  const products = await getAllProducts();
+  let products: Awaited<ReturnType<typeof getAllProductsStrict>> = [];
+  let errorCarga: string | null = null;
+  try {
+    products = await getAllProductsStrict();
+  } catch (err) {
+    errorCarga = (err as Error).message;
+  }
 
   return (
     <div>
@@ -19,6 +28,12 @@ export default async function AdminProductosPage() {
         </Link>
       </div>
 
+      {errorCarga && (
+        <p className="mb-6 text-sm text-red-600 bg-red-500/10 border border-red-500/30 px-4 py-3">
+          No se pudieron cargar los productos. Detalle: {errorCarga}
+        </p>
+      )}
+
       <div className="border border-nb-line/60 divide-y divide-nb-line/60">
         {products.map((p) => (
           <div key={p.id} className="flex items-center gap-4 p-4 bg-nb-card">
@@ -26,7 +41,7 @@ export default async function AdminProductosPage() {
               <Image src={p.imagenes[0]} alt={p.nombre} fill className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-base text-nb-cream truncate">
+              <p className="text-base font-medium text-nb-cream truncate">
                 {p.nombre}{" "}
                 {p.esProductoDePrueba && (
                   <span className="text-xs text-nb-beige/40">(prueba)</span>

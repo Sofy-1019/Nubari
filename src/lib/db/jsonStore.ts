@@ -45,7 +45,7 @@ function writeLocal<T>(name: string, data: T[]): void {
   fs.writeFileSync(filePath(name), JSON.stringify(data, null, 2), "utf-8");
 }
 
-export async function readAll<T>(name: string): Promise<T[]> {
+export async function readAll<T>(name: string, opts?: { strict?: boolean }): Promise<T[]> {
   if (hasBlob()) {
     try {
       const { blobs } = await list({ prefix: `${BLOB_PREFIX}${name}.json`, limit: 1 });
@@ -56,9 +56,12 @@ export async function readAll<T>(name: string): Promise<T[]> {
           if (text.trim()) return JSON.parse(text) as T[];
         }
       }
-    } catch {
+    } catch (err) {
+      if (opts?.strict) {
+        throw new Error(`No se pudo leer desde Vercel Blob: ${(err as Error).message}`);
+      }
       // Si falla la consulta a Blob, seguimos con el respaldo local
-      // en vez de romper la página.
+      // en vez de romper la página (modo no estricto, para el sitio público).
     }
   }
   return readLocal<T>(name);

@@ -8,6 +8,10 @@ export async function getAllProducts(): Promise<Product[]> {
   return readAll<Product>(COLLECTION);
 }
 
+export async function getAllProductsStrict(): Promise<Product[]> {
+  return readAll<Product>(COLLECTION, { strict: true });
+}
+
 export async function getActiveProducts(): Promise<Product[]> {
   return (await getAllProducts()).filter((p) => p.activo);
 }
