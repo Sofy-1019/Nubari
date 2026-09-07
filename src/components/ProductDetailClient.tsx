@@ -23,6 +23,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const stockVariante = variant ? variant.stock : product.stock;
   const sinStock = product.agotado || stockVariante <= 0;
 
+  // Si el color elegido tiene su propia foto, se muestra esa; si no, se
+  // sigue mostrando la galería general de fotos del producto.
+  const imagenPrincipal = variant?.imagen || product.imagenes[activeImg];
+
+  function elegirVariante(id: string) {
+    setVariantId(id);
+    setActiveImg(0);
+  }
+
   const whatsappHref = useMemo(
     () =>
       buildWhatsAppLink(
@@ -58,7 +67,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <div>
           <div className="relative aspect-[4/5] bg-nb-card border border-nb-line/50 overflow-hidden">
             <Image
-              src={product.imagenes[activeImg]}
+              src={imagenPrincipal}
               alt={product.nombre}
               fill
               priority
@@ -72,7 +81,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   key={img}
                   onClick={() => setActiveImg(i)}
                   className={`relative w-16 h-16 overflow-hidden border ${
-                    i === activeImg ? "border-nb-champagne" : "border-nb-line/50"
+                    !variant?.imagen && i === activeImg ? "border-nb-champagne" : "border-nb-line/50"
                   }`}
                 >
                   <Image src={img} alt="" fill className="object-cover" />
@@ -89,7 +98,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               PRODUCTO DE PRUEBA
             </span>
           )}
-          <h1 className="font-serif text-3xl sm:text-4xl text-nb-cream">{product.nombre}</h1>
+          <h1 className="font-serif font-semibold text-3xl sm:text-4xl text-nb-cream">{product.nombre}</h1>
           <div className="mt-3 flex items-center gap-3">
             <span className="text-2xl text-nb-champagne">{formatARS(precioFinal)}</span>
             {product.precioAnterior && (
@@ -141,7 +150,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 {product.variantes.map((v) => (
                   <button
                     key={v.id}
-                    onClick={() => setVariantId(v.id)}
+                    onClick={() => elegirVariante(v.id)}
                     className={`px-3.5 py-2 text-sm border transition-colors ${
                       v.id === variantId
                         ? "border-nb-champagne bg-nb-champagne/10 text-nb-cream"

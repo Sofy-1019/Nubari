@@ -53,6 +53,7 @@ type FormVariant = {
   id: string;
   color: string;
   priceDelta: string;
+  imagen?: string;
 };
 
 type FormTelaColor = {
@@ -118,6 +119,7 @@ function fromProduct(p?: Product): FormState {
             id: v.id,
             color: v.color || COLORES_ESTRUCTURA[0],
             priceDelta: v.priceDelta ? String(v.priceDelta) : "",
+            imagen: v.imagen,
           }))
         : [{ id: `${Date.now()}`, color: COLORES_ESTRUCTURA[0], priceDelta: "" }],
     telas: p?.telas
@@ -199,6 +201,20 @@ export default function ProductForm({ initial }: Props) {
     const usados = new Set(form.variantes.map((v) => v.color));
     const siguiente = COLORES_ESTRUCTURA.find((c) => !usados.has(c)) || COLORES_ESTRUCTURA[0];
     set("variantes", [...form.variantes, { id: `${Date.now()}`, color: siguiente, priceDelta: "" }]);
+  }
+
+  async function handleVariantPhoto(id: string, file: File) {
+    setUploadingSwatch(id);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      updateVariant(id, { imagen: url });
+    } catch (err) {
+      window.alert(
+        "No se pudo subir la foto del color. " + (err instanceof Error ? err.message : String(err))
+      );
+    } finally {
+      setUploadingSwatch(null);
+    }
   }
 
   function removeVariant(id: string) {
@@ -319,6 +335,7 @@ export default function ProductForm({ initial }: Props) {
         material: TERMINACION,
         stock: 9999,
         priceDelta: v.priceDelta ? Number(v.priceDelta) : undefined,
+        imagen: v.imagen,
       })),
       telas: form.telas
         .filter((t) => t.colores.length > 0)
@@ -587,26 +604,56 @@ export default function ProductForm({ initial }: Props) {
         <div className="space-y-3">
           {form.variantes.map((v) => (
             <div key={v.id} className="border border-nb-line/60 bg-nb-card p-4">
-              <div className="grid sm:grid-cols-3 gap-3 items-end">
-                <Field label="Color de estructura">
-                  <select className="input" value={v.color} onChange={(e) => updateVariant(v.id, { color: e.target.value })}>
-                    {COLORES_ESTRUCTURA.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Terminación">
-                  <input className="input opacity-60" value={TERMINACION} disabled />
-                </Field>
-                <Field label="Precio extra (opcional)">
-                  <input className="input" type="number" value={v.priceDelta} onChange={(e) => updateVariant(v.id, { priceDelta: e.target.value })} placeholder="0" />
-                </Field>
+              <div className="flex gap-4 items-start">
+                <label
+                  className="relative w-16 h-16 flex-shrink-0 border border-nb-line/60 overflow-hidden cursor-pointer bg-nb-carbon flex items-center justify-center"
+                  title="Foto del producto en este color"
+                >
+                  {v.imagen ? (
+                    <Image src={v.imagen} alt={v.color} fill className="object-cover" />
+                  ) : (
+                    <Upload size={16} className="text-nb-beige/50" />
+                  )}
+                  {uploadingSwatch === v.id && (
+                    <span className="absolute inset-0 flex items-center justify-center bg-nb-black/50">
+                      <Loader2 size={16} className="animate-spin text-nb-cream" />
+                    </span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (file) handleVariantPhoto(v.id, file);
+                    }}
+                  />
+                </label>
+                <div className="grid sm:grid-cols-3 gap-3 items-end flex-1">
+                  <Field label="Color de estructura">
+                    <select className="input" value={v.color} onChange={(e) => updateVariant(v.id, { color: e.target.value })}>
+                      {COLORES_ESTRUCTURA.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Terminación">
+                    <input className="input opacity-60" value={TERMINACION} disabled />
+                  </Field>
+                  <Field label="Precio extra (opcional)">
+                    <input className="input" type="number" value={v.priceDelta} onChange={(e) => updateVariant(v.id, { priceDelta: e.target.value })} placeholder="0" />
+                  </Field>
+                </div>
               </div>
+              <p className="text-xs text-nb-beige/50 mt-2 ml-20">
+                Tocá el cuadrito para subir la foto del producto en este color. Si no subís nada, se muestran las fotos generales.
+              </p>
               {form.variantes.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeVariant(v.id)}
-                  className="mt-3 text-sm text-nb-beige/70 hover:text-red-500 transition-colors flex items-center gap-1"
+                  className="mt-3 ml-20 text-sm text-nb-beige/70 hover:text-red-500 transition-colors flex items-center gap-1"
                 >
                   <Trash2 size={13} /> Quitar este color
                 </button>

@@ -14,6 +14,7 @@ export interface ProductVariant {
   id: string;
   color?: string; // color de la estructura: Negro / Blanco / Dorado
   material?: string; // terminación, siempre "Satinado"
+  imagen?: string; // foto del producto en este color, si es distinta de la principal
   skuSuffix?: string;
   stock: number;
   priceDelta?: number; // ajuste opcional sobre el precio base
