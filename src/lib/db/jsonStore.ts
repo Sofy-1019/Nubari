@@ -73,6 +73,7 @@ export async function writeAll<T>(name: string, data: T[]): Promise<void> {
       await put(`${BLOB_PREFIX}${name}.json`, JSON.stringify(data, null, 2), {
         access: "private",
         addRandomSuffix: false,
+        allowOverwrite: true,
         contentType: "application/json",
       });
     } catch (err) {

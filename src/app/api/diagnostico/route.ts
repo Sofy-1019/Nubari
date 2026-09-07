@@ -14,7 +14,7 @@ export async function GET() {
       const resultado = await put(
         "db/diagnostico-test.json",
         JSON.stringify({ probado: new Date().toISOString() }),
-        { access: "private", addRandomSuffix: false, contentType: "application/json" }
+        { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: "application/json" }
       );
       await del(resultado.url).catch(() => {});
       blobPrueba = { ok: true, detalle: "Se pudo escribir y borrar un archivo de prueba correctamente." };
