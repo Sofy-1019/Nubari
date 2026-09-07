@@ -20,6 +20,26 @@ const COLORES_ESTRUCTURA = ["Negro", "Blanco", "Dorado"] as const;
 const TERMINACION = "Satinado";
 const LARGOS_DISPONIBLES = [80, 100, 120] as const;
 
+const CATALOGO_PANA: { nombre: string; hex: string }[] = [
+  { nombre: "1", hex: "#8B7B6E" },
+  { nombre: "2", hex: "#D8CCB8" },
+  { nombre: "3", hex: "#A89684" },
+  { nombre: "4", hex: "#4A3B30" },
+  { nombre: "5", hex: "#D9A441" },
+  { nombre: "6", hex: "#C1652C" },
+  { nombre: "7", hex: "#B3141E" },
+  { nombre: "8", hex: "#7A2E24" },
+  { nombre: "9", hex: "#E2A98E" },
+  { nombre: "10", hex: "#8C9770" },
+  { nombre: "11", hex: "#2F4A3C" },
+  { nombre: "12", hex: "#4B3140" },
+  { nombre: "13", hex: "#2A4C63" },
+  { nombre: "14", hex: "#E7DFD3" },
+  { nombre: "15", hex: "#B8BCC0" },
+  { nombre: "16", hex: "#8B8983" },
+  { nombre: "17", hex: "#201C1A" },
+];
+
 const TELA_LABELS: Record<TelaTipo, string> = {
   pana: "Pana",
   "simil-cuero": "Símil cuero",
@@ -206,7 +226,11 @@ export default function ProductForm({ initial }: Props) {
     if (existe) {
       set("telas", form.telas.filter((t) => t.tipo !== tipo));
     } else {
-      set("telas", [...form.telas, { tipo, colores: [] }]);
+      const colores: FormTelaColor[] =
+        tipo === "pana"
+          ? CATALOGO_PANA.map((c, i) => ({ id: `pana-${i + 1}`, nombre: c.nombre, hex: c.hex }))
+          : [];
+      set("telas", [...form.telas, { tipo, colores }]);
     }
   }
 
@@ -333,18 +357,22 @@ export default function ProductForm({ initial }: Props) {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setError(
-          (data?.error || "No se pudo guardar el producto.") +
-            (data?.detail ? ` (${data.detail})` : "")
-        );
+        let data: { error?: string; detail?: string } | null = null;
+        let rawText = "";
+        try {
+          data = await res.json();
+        } catch {
+          rawText = await res.text().catch(() => "");
+        }
+        const detalle = data?.detail || rawText.slice(0, 200) || `código ${res.status}`;
+        setError(`${data?.error || "No se pudo guardar el producto"}. Detalle: ${detalle}`);
         return;
       }
       router.push("/admin/productos");
       router.refresh();
     } catch (err) {
       setError(
-        "No se pudo guardar el producto. Revisá tu conexión a internet. " +
+        "No se pudo conectar con el servidor para guardar el producto. Revisá tu conexión a internet. " +
           (err instanceof Error ? err.message : "")
       );
     } finally {
@@ -446,7 +474,7 @@ export default function ProductForm({ initial }: Props) {
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
           <Field label="Nombre del producto" span2>
-            <input className="input" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} placeholder="Ej: Banqueta Nubari Tapizada" />
+            <input className="input font-medium text-lg" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} placeholder="Ej: Banqueta Nubari Tapizada" />
           </Field>
           <Field label="Descripción" span2>
             <textarea className="input" rows={3} value={form.descripcion} onChange={(e) => set("descripcion", e.target.value)} placeholder="Contale al cliente de qué está hecho, para qué sirve..." />
@@ -639,11 +667,11 @@ export default function ProductForm({ initial }: Props) {
                 <p className="text-sm uppercase tracking-widest3 text-nb-champagne mb-3">
                   {TELA_LABELS[tela.tipo]} — colores del catálogo
                 </p>
-                <div className="flex flex-wrap gap-4 mb-4">
+                <div className="grid grid-cols-6 gap-3 mb-4">
                   {tela.colores.map((c) => (
-                    <div key={c.id} className="flex flex-col items-center gap-1.5 w-24">
+                    <div key={c.id} className="flex flex-col items-center gap-1.5">
                       <label
-                        className="relative w-14 h-14 rounded-full border-2 border-nb-line/70 overflow-hidden cursor-pointer flex-shrink-0"
+                        className="relative w-full aspect-square rounded-full border-2 border-nb-line/70 overflow-hidden cursor-pointer flex-shrink-0"
                         style={{ backgroundColor: c.hex }}
                         title="Tocar para subir una foto real de esta tela"
                       >
@@ -664,39 +692,49 @@ export default function ProductForm({ initial }: Props) {
                           }}
                         />
                       </label>
-                      <input
-                        className="input !p-1.5 !text-xs text-center"
-                        value={c.nombre}
-                        onChange={(ev) => updateColorTela(tela.tipo, c.id, { nombre: ev.target.value })}
-                        placeholder="Nombre"
-                      />
-                      <input
-                        type="color"
-                        value={c.hex}
-                        onChange={(ev) => updateColorTela(tela.tipo, c.id, { hex: ev.target.value })}
-                        className="w-8 h-6 border border-nb-line/60 cursor-pointer bg-transparent"
-                        title="Color de referencia (si no subís foto real)"
-                      />
+                      {tela.tipo === "pana" ? (
+                        <span className="text-xs text-nb-beige/70">{c.nombre}</span>
+                      ) : (
+                        <input
+                          className="input !p-1.5 !text-xs text-center"
+                          value={c.nombre}
+                          onChange={(ev) => updateColorTela(tela.tipo, c.id, { nombre: ev.target.value })}
+                          placeholder="Nombre"
+                        />
+                      )}
+                      {tela.tipo !== "pana" && (
+                        <input
+                          type="color"
+                          value={c.hex}
+                          onChange={(ev) => updateColorTela(tela.tipo, c.id, { hex: ev.target.value })}
+                          className="w-8 h-6 border border-nb-line/60 cursor-pointer bg-transparent"
+                          title="Color de referencia (si no subís foto real)"
+                        />
+                      )}
                       <button
                         type="button"
                         onClick={() => removeColorTela(tela.tipo, c.id)}
                         className="text-nb-beige/60 hover:text-red-500 transition-colors"
+                        title="No ofrecer este color para este producto"
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => addColorTela(tela.tipo)}
-                  className="text-sm text-nb-champagne hover:text-nb-gold transition-colors flex items-center gap-1"
-                >
-                  <Plus size={14} /> Agregar color de {TELA_LABELS[tela.tipo].toLowerCase()}
-                </button>
+                {tela.tipo !== "pana" && (
+                  <button
+                    type="button"
+                    onClick={() => addColorTela(tela.tipo)}
+                    className="text-sm text-nb-champagne hover:text-nb-gold transition-colors flex items-center gap-1"
+                  >
+                    <Plus size={14} /> Agregar color de {TELA_LABELS[tela.tipo].toLowerCase()}
+                  </button>
+                )}
                 <p className="text-xs text-nb-beige/50 mt-2">
-                  Tocá el círculo para subir la foto real del color del catálogo (cuando la tengas). Mientras
-                  tanto, el color de al lado se usa como referencia.
+                  {tela.tipo === "pana"
+                    ? "Ya están cargados los 17 colores del catálogo de pana. Tocá cualquier círculo para subirle la foto real cuando tengas los muestrarios, y sacá con el tachito los colores que no ofrezcas para este producto."
+                    : "Tocá el círculo para subir la foto real del color del catálogo (cuando la tengas). Mientras tanto, el color de al lado se usa como referencia."}
                 </p>
               </div>
             ))}
